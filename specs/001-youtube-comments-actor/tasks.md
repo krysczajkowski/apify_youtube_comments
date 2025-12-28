@@ -77,11 +77,11 @@
 
 ### Implementation for User Story 2
 
-- [ ] T024 [US2] Implement batch URL processing loop in src/main.ts (iterate startUrls array, process each video)
-- [ ] T025 [US2] Add per-video error isolation in src/main.ts (continue processing remaining videos when one fails)
-- [ ] T026 [US2] Add invalid URL detection in src/utils/url.ts (reject non-YouTube URLs, log as PERMANENT error)
-- [ ] T027 [US2] Add video-level status tracking in src/main.ts (track PENDING/PROCESSING/SUCCESS/FAILED per video)
-- [ ] T028 [US2] Update logging for batch context in src/utils/logger.ts (include video index, URL in log messages)
+- [x] T024 [US2] Implement batch URL processing loop in src/main.ts (iterate startUrls array, process each video)
+- [x] T025 [US2] Add per-video error isolation in src/main.ts (continue processing remaining videos when one fails)
+- [x] T026 [US2] Add invalid URL detection in src/utils/url.ts (reject non-YouTube URLs, log as PERMANENT error)
+- [x] T027 [US2] Add video-level status tracking in src/main.ts (track PENDING/PROCESSING/SUCCESS/FAILED per video)
+- [x] T028 [US2] Update logging for batch context in src/utils/logger.ts (include video index, URL in log messages)
 
 **Checkpoint**: Batch processing of multiple videos functional and testable
 
