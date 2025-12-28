@@ -1,0 +1,58 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "YouTube Comments Scraper Input",
+  "description": "Input schema for the YouTube Comments Scraper Actor",
+  "type": "object",
+  "schemaVersion": 1,
+  "properties": {
+    "startUrls": {
+      "title": "Direct video URLs",
+      "type": "array",
+      "description": "Enter a link to a specific YouTube video. You can also import a CSV file or Google Sheet with a list of URLs.",
+      "prefill": [],
+      "editor": "requestListSources",
+      "items": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string",
+            "format": "uri"
+          },
+          "method": {
+            "type": "string",
+            "default": "GET"
+          }
+        },
+        "required": ["url"]
+      }
+    },
+    "maxComments": {
+      "title": "Maximum comments",
+      "type": "integer",
+      "description": "Limit the number of comments you want to scrape per video. Set to 0 or leave empty for unlimited extraction (warning will be logged for videos with 100k+ comments).",
+      "default": 0,
+      "minimum": 0,
+      "editor": "number"
+    },
+    "commentsSortBy": {
+      "title": "Sorting order",
+      "type": "string",
+      "description": "Select YouTube sorting parameter for comments",
+      "default": "1",
+      "enum": ["0", "1"],
+      "enumTitles": ["Top comments (by engagement)", "Newest first (chronological)"],
+      "editor": "select"
+    },
+    "proxyConfiguration": {
+      "title": "Proxy configuration",
+      "type": "object",
+      "description": "Select proxies to use for scraping. Residential proxies are required for reliable YouTube scraping.",
+      "default": {
+        "useApifyProxy": true,
+        "apifyProxyGroups": ["RESIDENTIAL"]
+      },
+      "editor": "proxy"
+    }
+  },
+  "required": ["startUrls"]
+}

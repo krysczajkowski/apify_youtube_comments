@@ -1,0 +1,30 @@
+{
+  "name": "youtube-comments-scraper",
+  "version": "1.0.0",
+  "description": "Apify Actor that extracts YouTube comments from video URLs",
+  "main": "dist/main.js",
+  "type": "module",
+  "scripts": {
+    "start": "npm run build && node dist/main.js",
+    "start:prod": "node dist/main.js",
+    "build": "tsc",
+    "lint": "eslint src --ext .ts",
+    "test": "echo \"No tests configured\" && exit 0"
+  },
+  "author": "",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {
+    "apify": "^3.0.0",
+    "crawlee": "^3.0.0",
+    "got-scraping": "^4.0.0"
+  },
+  "devDependencies": {
+    "@apify/eslint-config-ts": "^0.3.0",
+    "@types/node": "^20.0.0",
+    "eslint": "^8.0.0",
+    "typescript": "^5.0.0"
+  }
+}

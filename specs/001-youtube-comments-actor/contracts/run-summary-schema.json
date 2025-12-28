@@ -1,0 +1,110 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Run Summary",
+  "description": "Summary statistics written to Key-Value Store at end of actor run",
+  "type": "object",
+  "properties": {
+    "startedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO timestamp when the run started"
+    },
+    "finishedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO timestamp when the run finished"
+    },
+    "totalVideos": {
+      "type": "integer",
+      "description": "Total number of videos in input"
+    },
+    "successfulVideos": {
+      "type": "integer",
+      "description": "Videos with at least some comments extracted"
+    },
+    "failedVideos": {
+      "type": "integer",
+      "description": "Videos that failed completely"
+    },
+    "totalComments": {
+      "type": "integer",
+      "description": "Total comments extracted across all videos"
+    },
+    "totalReplies": {
+      "type": "integer",
+      "description": "Total replies extracted (subset of totalComments)"
+    },
+    "avgCommentsPerSecond": {
+      "type": "number",
+      "description": "Average extraction throughput"
+    },
+    "durationSeconds": {
+      "type": "number",
+      "description": "Total run duration in seconds"
+    },
+    "errors": {
+      "type": "array",
+      "description": "Error summary by category",
+      "items": {
+        "type": "object",
+        "properties": {
+          "category": {
+            "type": "string",
+            "enum": ["BLOCKED", "TRANSIENT", "PERMANENT"],
+            "description": "Error classification"
+          },
+          "count": {
+            "type": "integer",
+            "description": "Number of occurrences"
+          },
+          "message": {
+            "type": "string",
+            "description": "Representative error message"
+          },
+          "urls": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Sample URLs that encountered this error"
+          }
+        },
+        "required": ["category", "count", "message"]
+      }
+    },
+    "recommendations": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Actionable suggestions based on run results"
+    }
+  },
+  "required": [
+    "startedAt",
+    "finishedAt",
+    "totalVideos",
+    "successfulVideos",
+    "failedVideos",
+    "totalComments",
+    "durationSeconds"
+  ],
+  "examples": [
+    {
+      "startedAt": "2025-12-28T10:00:00.000Z",
+      "finishedAt": "2025-12-28T10:02:30.000Z",
+      "totalVideos": 3,
+      "successfulVideos": 2,
+      "failedVideos": 1,
+      "totalComments": 450,
+      "totalReplies": 87,
+      "avgCommentsPerSecond": 3.0,
+      "durationSeconds": 150,
+      "errors": [
+        {
+          "category": "PERMANENT",
+          "count": 1,
+          "message": "Comments disabled for video",
+          "urls": ["https://www.youtube.com/watch?v=abc123"]
+        }
+      ],
+      "recommendations": []
+    }
+  ]
+}

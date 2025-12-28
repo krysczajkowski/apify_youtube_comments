@@ -1,0 +1,69 @@
+{
+  "actorSpecification": 1,
+  "name": "youtube-comments-scraper",
+  "title": "YouTube Comments Scraper",
+  "description": "Extracts all publicly visible comments from YouTube videos with full metadata including author, engagement metrics, and creator interactions.",
+  "version": "1.0.0",
+  "input": "./input_schema.json",
+  "dockerfile": "./Dockerfile",
+  "storages": {
+    "dataset": {
+      "actorSpecification": 1,
+      "title": "YouTube Comments",
+      "views": {
+        "comments": {
+          "title": "Comments",
+          "transformation": {
+            "fields": [
+              "comment",
+              "author",
+              "voteCount",
+              "replyCount",
+              "date",
+              "type",
+              "videoId",
+              "title"
+            ]
+          },
+          "display": {
+            "component": "table",
+            "properties": {
+              "comment": {
+                "label": "Comment",
+                "format": "text"
+              },
+              "author": {
+                "label": "Author",
+                "format": "text"
+              },
+              "voteCount": {
+                "label": "Likes",
+                "format": "number"
+              },
+              "replyCount": {
+                "label": "Replies",
+                "format": "number"
+              },
+              "date": {
+                "label": "Date",
+                "format": "text"
+              },
+              "type": {
+                "label": "Type",
+                "format": "text"
+              },
+              "videoId": {
+                "label": "Video ID",
+                "format": "text"
+              },
+              "title": {
+                "label": "Video Title",
+                "format": "text"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
