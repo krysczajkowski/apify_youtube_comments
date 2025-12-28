@@ -15,10 +15,11 @@ import {
     extractCommentsCount,
     extractCommentsContinuationToken,
     areCommentsDisabled,
+    detectCommentsDisabledNoToken,
 } from './extractors/metadata.js';
 import { parseCommentsFromResponse, parseRepliesFromResponse, validateCommentOutput } from './extractors/comments.js';
-import { withRetry, classifyError } from './utils/retry.js';
-import { logDebug, logInfo, logWarning, logPaginationProgress, logRateLimit, logLargeVolumeWarning } from './utils/logger.js';
+import { withRetry, classifyError, getTimeoutActionableMessage } from './utils/retry.js';
+import { logDebug, logInfo, logWarning, logPaginationProgress, logRateLimit, logLargeVolumeWarning, logPartialResultsTimeout } from './utils/logger.js';
 
 /**
  * InnerTube API key (mweb client key - stable and commonly used)
@@ -121,6 +122,7 @@ export class CommentsDisabledError extends Error {
 
 /**
  * Custom error for rate limiting
+ * T025: Includes actionable message about proxies
  */
 export class RateLimitError extends Error {
     statusCode: number;
@@ -129,6 +131,19 @@ export class RateLimitError extends Error {
         super(message);
         this.name = 'RateLimitError';
         this.statusCode = statusCode;
+    }
+
+    /**
+     * Returns user-friendly error message with proxy suggestion
+     */
+    static getActionableMessage(statusCode: number): string {
+        if (statusCode === 429) {
+            return 'Rate limited by YouTube - consider using proxies or reducing request frequency';
+        }
+        if (statusCode === 403) {
+            return 'Access denied by YouTube - try using proxies or wait before retrying';
+        }
+        return `YouTube API error (${statusCode}) - consider using proxies`;
     }
 }
 
@@ -331,6 +346,19 @@ export async function extractComments(options: ExtractCommentsOptions): Promise<
     }
 
     if (!continuationToken) {
+        // T023/T024: Check if comments are disabled when no token found
+        if (detectCommentsDisabledNoToken(ytInitialData)) {
+            logInfo(`Comments are disabled for this video`, { videoId });
+            return {
+                comments: [],
+                metadata,
+                commentCount: 0,
+                replyCount: 0,
+                completed: true,
+                error: 'Comments are disabled for this video',
+                errorCategory: 'PERMANENT',
+            };
+        }
         logInfo(`No comments found or comments section not available`, { videoId });
         return {
             comments: [],
@@ -355,14 +383,16 @@ export async function extractComments(options: ExtractCommentsOptions): Promise<
         // T020: Check total timeout at start of each iteration
         const elapsedMs = Date.now() - extractionStartTime;
         if (elapsedMs >= TOTAL_EXTRACTION_TIMEOUT_MS) {
-            logWarning(`Total extraction timeout (${TOTAL_EXTRACTION_TIMEOUT_MS}ms) reached after ${comments.length} comments`, { videoId });
+            // T027: Structured warning for partial results due to timeout
+            logPartialResultsTimeout(videoId, comments.length, 'total', elapsedMs);
             timedOut = true;
             break;
         }
 
         // Check first batch deadline (only before first comments arrive)
         if (!firstBatchReceived && elapsedMs >= FIRST_BATCH_DEADLINE_MS) {
-            logWarning(`First batch deadline (${FIRST_BATCH_DEADLINE_MS}ms) exceeded`, { videoId });
+            // T027: Structured warning for first batch deadline timeout
+            logPartialResultsTimeout(videoId, comments.length, 'first_batch', elapsedMs);
             timedOut = true;
             break;
         }
@@ -408,16 +438,22 @@ export async function extractComments(options: ExtractCommentsOptions): Promise<
 
             continuationToken = parsed.nextContinuationToken;
         } catch (error) {
-            const category = classifyError(
-                (error as { statusCode?: number }).statusCode ?? null,
-                (error as Error).message,
-            );
+            const statusCode = (error as { statusCode?: number }).statusCode ?? null;
+            const errorMessage = (error as Error).message;
+            const category = classifyError(statusCode, errorMessage);
 
-            if (category === 'BLOCKED') {
+            // T025: Provide actionable error message for rate limits
+            if (category === 'BLOCKED' && statusCode) {
+                const actionableMessage = RateLimitError.getActionableMessage(statusCode);
                 logRateLimit(videoId, 0, 0);
+                logWarning(actionableMessage, { videoId, errorCategory: category, statusCode });
+            } else if (category === 'TRANSIENT' && !statusCode) {
+                // T026: Provide actionable message for timeout/network errors
+                const actionableMessage = getTimeoutActionableMessage(errorMessage);
+                logWarning(actionableMessage, { videoId, errorCategory: category });
+            } else {
+                logWarning(`Error during pagination: ${errorMessage}`, { videoId, errorCategory: category });
             }
-
-            logWarning(`Error during pagination: ${(error as Error).message}`, { videoId, errorCategory: category });
             break;
         }
     }
@@ -430,7 +466,8 @@ export async function extractComments(options: ExtractCommentsOptions): Promise<
             // Check timeout before processing each parent's replies
             const elapsedMs = Date.now() - extractionStartTime;
             if (elapsedMs >= TOTAL_EXTRACTION_TIMEOUT_MS) {
-                logWarning(`Total extraction timeout reached during reply extraction`, { videoId });
+                // T027: Structured warning for timeout during reply extraction
+                logPartialResultsTimeout(videoId, comments.length, 'total', elapsedMs);
                 timedOut = true;
                 break;
             }
@@ -444,7 +481,8 @@ export async function extractComments(options: ExtractCommentsOptions): Promise<
                 // Check timeout at each reply page
                 const replyElapsedMs = Date.now() - extractionStartTime;
                 if (replyElapsedMs >= TOTAL_EXTRACTION_TIMEOUT_MS) {
-                    logWarning(`Total extraction timeout reached during reply pagination`, { videoId });
+                    // T027: Structured warning for timeout during reply pagination
+                    logPartialResultsTimeout(videoId, comments.length, 'total', replyElapsedMs);
                     timedOut = true;
                     break;
                 }
@@ -480,10 +518,8 @@ export async function extractComments(options: ExtractCommentsOptions): Promise<
     // T022: Return partial results - completed is false if timed out or more pages exist
     const completed = !timedOut && (!continuationToken || comments.length >= effectiveMaxComments);
 
-    // Log if returning partial results due to timeout
-    if (timedOut && comments.length > 0) {
-        logWarning(`Returning ${comments.length} partial results due to timeout`, { videoId });
-    }
+    // T027: Note - structured timeout warnings are logged at the point of timeout
+    // No additional warning needed here as logPartialResultsTimeout was already called
 
     return {
         comments,

@@ -412,3 +412,47 @@ export function areCommentsDisabled(ytInitialData: Record<string, unknown>): boo
 
     return false;
 }
+
+/**
+ * T023: Detects if comments are disabled when no continuation token is found
+ * This is a secondary check that considers the absence of comment sections
+ * @param ytInitialData - Parsed ytInitialData
+ * @returns true if comments appear to be disabled (no comment section present)
+ */
+export function detectCommentsDisabledNoToken(ytInitialData: Record<string, unknown>): boolean {
+    // If explicit disabled message found, comments are disabled
+    if (areCommentsDisabled(ytInitialData)) {
+        return true;
+    }
+
+    // Check if engagement panels exist but have no comments panel
+    const engagementPanels = ytInitialData.engagementPanels as Array<Record<string, unknown>>;
+    if (engagementPanels && Array.isArray(engagementPanels)) {
+        let hasCommentsPanel = false;
+        for (const panel of engagementPanels) {
+            const sectionList = panel?.engagementPanelSectionListRenderer as Record<string, unknown>;
+            if (sectionList?.panelIdentifier === 'comment-item-section') {
+                hasCommentsPanel = true;
+                break;
+            }
+            // Also check header for comments
+            const header = sectionList?.header as Record<string, unknown>;
+            const titleHeader = header?.engagementPanelTitleHeaderRenderer as Record<string, unknown>;
+            const title = titleHeader?.title as Record<string, unknown>;
+            const runs = title?.runs as Array<{ text: string }>;
+            if (runs) {
+                const titleText = runs.map((r) => r.text).join('').toLowerCase();
+                if (titleText.includes('comment')) {
+                    hasCommentsPanel = true;
+                    break;
+                }
+            }
+        }
+        // If we have engagement panels but no comments panel, comments are likely disabled
+        if (engagementPanels.length > 0 && !hasCommentsPanel) {
+            return true;
+        }
+    }
+
+    return false;
+}

@@ -89,11 +89,11 @@
 
 ### Implementation for User Story 3
 
-- [ ] T023 [US3] Add "comments disabled" detection when no comment continuation token found in initial response in src/extractors/metadata.ts
-- [ ] T024 [US3] Return specific error message "Comments are disabled for this video" when detected in src/crawler.ts
-- [ ] T025 [US3] Add rate limit (429) detection with message "Rate limited - consider using proxies" in src/crawler.ts
-- [ ] T026 [US3] Add network timeout error message with retry suggestion in src/crawler.ts
-- [ ] T027 [US3] Log structured warnings when partial results are returned due to timeout in src/crawler.ts
+- [X] T023 [US3] Add "comments disabled" detection when no comment continuation token found in initial response in src/extractors/metadata.ts
+- [X] T024 [US3] Return specific error message "Comments are disabled for this video" when detected in src/crawler.ts
+- [X] T025 [US3] Add rate limit (429) detection with message "Rate limited - consider using proxies" in src/crawler.ts
+- [X] T026 [US3] Add network timeout error message with retry suggestion in src/crawler.ts
+- [X] T027 [US3] Log structured warnings when partial results are returned due to timeout in src/crawler.ts
 
 **Checkpoint**: Error messages are now clear and actionable for all failure scenarios
 

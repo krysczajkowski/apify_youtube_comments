@@ -192,3 +192,37 @@ export function logLargeVolumeWarning(videoId: string, commentsCount: number): v
         { videoId, commentCount: commentsCount },
     );
 }
+
+/**
+ * T027: Logs structured warning when partial results are returned due to timeout
+ * @param videoId - Video ID being processed
+ * @param commentsExtracted - Number of comments successfully extracted
+ * @param timeoutType - Type of timeout that occurred
+ * @param elapsedMs - Time elapsed before timeout
+ */
+export function logPartialResultsTimeout(
+    videoId: string,
+    commentsExtracted: number,
+    timeoutType: 'total' | 'first_batch' | 'request',
+    elapsedMs: number,
+): void {
+    const timeoutDescriptions: Record<typeof timeoutType, string> = {
+        total: 'Total extraction timeout (5 min) reached',
+        first_batch: 'First batch deadline (30s) exceeded',
+        request: 'Individual request timeout',
+    };
+
+    const description = timeoutDescriptions[timeoutType];
+    const elapsedSeconds = Math.round(elapsedMs / 1000);
+
+    logWarning(
+        `${description} after ${elapsedSeconds}s. Returning ${commentsExtracted} partial results. `
+        + `Consider using maxComments to get faster results.`,
+        {
+            videoId,
+            commentCount: commentsExtracted,
+            timeoutType,
+            elapsedMs,
+        },
+    );
+}
