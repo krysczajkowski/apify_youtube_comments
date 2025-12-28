@@ -53,17 +53,17 @@
 
 ### Implementation for User Story 1
 
-- [ ] T013 [US1] Create video metadata extractor in src/extractors/metadata.ts (extract videoId, title, commentsCount from ytInitialData)
-- [ ] T014 [US1] Create comment data extractor in src/extractors/comments.ts (parse commentRenderer to output schema fields)
-- [ ] T015 [US1] Implement InnerTube API client in src/crawler.ts (got-scraping POST to /youtubei/v1/next with context)
-- [ ] T016 [US1] Implement initial page fetch in src/crawler.ts (GET video page, extract ytInitialData, find comments continuation token)
-- [ ] T017 [US1] Implement comment pagination in src/crawler.ts (follow continuation tokens until exhausted or maxComments reached)
-- [ ] T018 [US1] Implement reply extraction in src/crawler.ts (nested continuation tokens with parent linking via replyToCid)
-- [ ] T019 [US1] Implement sort order support in src/crawler.ts (commentsSortBy "0" = Top, "1" = Newest)
-- [ ] T020 [US1] Integrate crawler with main.ts (single video processing, push comments to dataset)
-- [ ] T021 [US1] Add maxComments limit enforcement in src/main.ts (stop extraction when limit reached, warn if <=0 means unlimited)
-- [ ] T022 [US1] Add error handling for comments disabled in src/crawler.ts (detect and log "Comments disabled" as PERMANENT error)
-- [ ] T023 [US1] Add rate limit handling in src/crawler.ts (detect 429/403, trigger exponential backoff from retry.ts)
+- [x] T013 [US1] Create video metadata extractor in src/extractors/metadata.ts (extract videoId, title, commentsCount from ytInitialData)
+- [x] T014 [US1] Create comment data extractor in src/extractors/comments.ts (parse commentRenderer to output schema fields)
+- [x] T015 [US1] Implement InnerTube API client in src/crawler.ts (got-scraping POST to /youtubei/v1/next with context)
+- [x] T016 [US1] Implement initial page fetch in src/crawler.ts (GET video page, extract ytInitialData, find comments continuation token)
+- [x] T017 [US1] Implement comment pagination in src/crawler.ts (follow continuation tokens until exhausted or maxComments reached)
+- [x] T018 [US1] Implement reply extraction in src/crawler.ts (nested continuation tokens with parent linking via replyToCid)
+- [x] T019 [US1] Implement sort order support in src/crawler.ts (commentsSortBy "0" = Top, "1" = Newest)
+- [x] T020 [US1] Integrate crawler with main.ts (single video processing, push comments to dataset)
+- [x] T021 [US1] Add maxComments limit enforcement in src/main.ts (stop extraction when limit reached, warn if <=0 means unlimited)
+- [x] T022 [US1] Add error handling for comments disabled in src/crawler.ts (detect and log "Comments disabled" as PERMANENT error)
+- [x] T023 [US1] Add rate limit handling in src/crawler.ts (detect 429/403, trigger exponential backoff from retry.ts)
 
 **Checkpoint**: Single video comment extraction fully functional and testable
 

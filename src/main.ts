@@ -9,7 +9,13 @@ import type { ActorInput, ValidatedInput, StartUrl } from './types/input.js';
 import { INPUT_DEFAULTS } from './types/input.js';
 import type { RunSummary, VideoState, ErrorCategory, ErrorSummary } from './types/run-summary.js';
 import { validateYouTubeUrl } from './utils/url.js';
-import { logInfo, logError, logWarning, logVideoStart, logVideoFailed } from './utils/logger.js';
+import { logInfo, logError, logWarning, logVideoStart, logVideoFailed, logVideoComplete, logLargeVolumeWarning } from './utils/logger.js';
+import { extractComments } from './crawler.js';
+
+/**
+ * Large comment volume threshold for warning (T039)
+ */
+const LARGE_VOLUME_THRESHOLD = 100000;
 
 /**
  * Validates actor input and applies defaults
@@ -199,8 +205,7 @@ Actor.main(async () => {
         });
     }
 
-    // Process each video
-    // TODO: Implement actual comment extraction in crawler.ts (Phase 3)
+    // Process each video (T020: Integration with crawler)
     for (let i = 0; i < validUrls.length; i++) {
         const urlInfo = validUrls[i];
         const state = videoStates[i];
@@ -209,15 +214,75 @@ Actor.main(async () => {
         state.status = 'PROCESSING';
 
         try {
-            // TODO: Call crawler to extract comments
-            // const comments = await extractComments(urlInfo, input, proxyConfiguration);
-            // await Actor.pushData(comments);
-            // state.commentsExtracted = comments.length;
-            // state.status = 'SUCCESS';
+            // T021: maxComments limit enforcement
+            // Value of 0 means unlimited extraction
+            const effectiveMaxComments = input.maxComments;
 
-            // Placeholder: Mark as success for skeleton
-            state.status = 'SUCCESS';
-            logInfo(`Completed processing (skeleton mode)`, { videoId: urlInfo.videoId });
+            // T039: Warn about large volumes before extraction starts (if we knew the count)
+            // The crawler will also warn during extraction
+
+            // Extract comments using the crawler
+            const result = await extractComments({
+                videoId: urlInfo.videoId,
+                videoUrl: urlInfo.normalizedUrl,
+                originalUrl: urlInfo.originalUrl,
+                maxComments: effectiveMaxComments,
+                sortBy: input.commentsSortBy,
+                proxyConfiguration,
+                includeReplies: true,
+            });
+
+            // Handle extraction result
+            if (result.error) {
+                if (result.errorCategory === 'PERMANENT') {
+                    // Permanent error (comments disabled, video not found, etc.)
+                    state.status = 'FAILED';
+                    state.errorMessage = result.error;
+                    state.errorCategory = result.errorCategory;
+                    logVideoFailed(urlInfo.videoId, result.error, result.errorCategory, i, validUrls.length);
+                } else if (result.comments.length > 0) {
+                    // Partial success - got some comments before error
+                    state.status = 'PARTIAL';
+                    state.commentsExtracted = result.commentCount;
+                    state.repliesExtracted = result.replyCount;
+                    state.errorMessage = result.error;
+                    state.errorCategory = result.errorCategory;
+
+                    // Push partial results to dataset
+                    await Actor.pushData(result.comments);
+                    logWarning(`Partial extraction: ${result.commentCount} comments before error`, {
+                        videoId: urlInfo.videoId,
+                        commentCount: result.commentCount,
+                    });
+                } else {
+                    // Failed with no comments
+                    state.status = 'FAILED';
+                    state.errorMessage = result.error;
+                    state.errorCategory = result.errorCategory || 'TRANSIENT';
+                    logVideoFailed(urlInfo.videoId, result.error, state.errorCategory, i, validUrls.length);
+                }
+            } else {
+                // Successful extraction
+                state.status = 'SUCCESS';
+                state.commentsExtracted = result.commentCount;
+                state.repliesExtracted = result.replyCount;
+
+                // Push comments to dataset
+                if (result.comments.length > 0) {
+                    await Actor.pushData(result.comments);
+                }
+
+                logVideoComplete(urlInfo.videoId, result.commentCount, i, validUrls.length);
+
+                // T039: Log warning for large video volumes if unlimited extraction
+                if (
+                    result.metadata.commentsCount &&
+                    result.metadata.commentsCount >= LARGE_VOLUME_THRESHOLD &&
+                    input.maxComments <= 0
+                ) {
+                    logLargeVolumeWarning(urlInfo.videoId, result.metadata.commentsCount);
+                }
+            }
         } catch (error) {
             state.status = 'FAILED';
             state.errorMessage = error instanceof Error ? error.message : String(error);
