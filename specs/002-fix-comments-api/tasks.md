@@ -19,9 +19,9 @@
 
 **Purpose**: Preparation and validation before making changes
 
-- [ ] T001 Verify current codebase compiles with `npm run build`
-- [ ] T002 Review current implementation in src/crawler.ts for API request structure
-- [ ] T003 [P] Review current implementation in src/extractors/metadata.ts for continuation token extraction
+- [X] T001 Verify current codebase compiles with `npm run build`
+- [X] T002 Review current implementation in src/crawler.ts for API request structure
+- [X] T003 [P] Review current implementation in src/extractors/metadata.ts for continuation token extraction
 
 ---
 
@@ -31,11 +31,11 @@
 
 **⚠️ CRITICAL**: These fixes are prerequisites for all user stories - incorrect API parameters will cause all stories to fail
 
-- [ ] T004 Add API key constant to src/crawler.ts: `const INNERTUBE_API_KEY = 'AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8'`
-- [ ] T005 Update INNERTUBE_API_URL to include API key query parameter in src/crawler.ts
-- [ ] T006 Update clientVersion to `2.20250312.04.00` in INNERTUBE_CONTEXT in src/crawler.ts
-- [ ] T007 Add timeZone: 'UTC' field to client context in src/crawler.ts
-- [ ] T008 Add utcOffsetMinutes: 0 field to client context in src/crawler.ts
+- [X] T004 Add API key constant to src/crawler.ts: `const INNERTUBE_API_KEY = 'AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8'`
+- [X] T005 Update INNERTUBE_API_URL to include API key query parameter in src/crawler.ts
+- [X] T006 Update clientVersion to `2.20250312.04.00` in INNERTUBE_CONTEXT in src/crawler.ts
+- [X] T007 Add timeZone: 'UTC' field to client context in src/crawler.ts
+- [X] T008 Add utcOffsetMinutes: 0 field to client context in src/crawler.ts
 
 **Checkpoint**: API configuration complete - user story implementation can now begin
 

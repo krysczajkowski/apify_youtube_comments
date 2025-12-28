@@ -21,22 +21,32 @@ import { withRetry, classifyError } from './utils/retry.js';
 import { logDebug, logInfo, logWarning, logPaginationProgress, logRateLimit, logLargeVolumeWarning } from './utils/logger.js';
 
 /**
+ * InnerTube API key (mweb client key - stable and commonly used)
+ * Per research.md: Required for reliable API access
+ */
+const INNERTUBE_API_KEY = 'AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8';
+
+/**
  * InnerTube API context for YouTube requests
  * Client version should be updated periodically to match YouTube's web client
+ * Per research.md: Updated context with timeZone and utcOffsetMinutes
  */
 const INNERTUBE_CONTEXT = {
     client: {
         clientName: 'WEB',
-        clientVersion: '2.20251220.00.00',
+        clientVersion: '2.20250312.04.00',
         hl: 'en',
         gl: 'US',
+        timeZone: 'UTC',
+        utcOffsetMinutes: 0,
     },
 };
 
 /**
  * InnerTube API endpoints
+ * Per research.md: API key required as query parameter
  */
-const INNERTUBE_API_URL = 'https://www.youtube.com/youtubei/v1/next';
+const INNERTUBE_API_URL = `https://www.youtube.com/youtubei/v1/next?key=${INNERTUBE_API_KEY}`;
 const YOUTUBE_VIDEO_URL = 'https://www.youtube.com/watch';
 
 /**
