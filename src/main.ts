@@ -5,12 +5,25 @@
  */
 
 import { Actor, ProxyConfiguration } from 'apify';
-import type { ActorInput, ValidatedInput, StartUrl } from './types/input.js';
+import type { ActorInput, ValidatedInput, StartUrl, StartUrlInput } from './types/input.js';
 import { INPUT_DEFAULTS } from './types/input.js';
+
 import type { RunSummary, VideoState, ErrorCategory, ErrorSummary } from './types/run-summary.js';
 import { validateYouTubeUrl } from './utils/url.js';
 import { logInfo, logError, logWarning, logVideoStart, logVideoFailed, logVideoComplete, logLargeVolumeWarning } from './utils/logger.js';
 import { extractComments } from './crawler.js';
+
+/**
+ * Normalizes startUrls to always be object format
+ */
+function normalizeStartUrls(startUrls: StartUrlInput[]): StartUrl[] {
+    return startUrls.map((item) => {
+        if (typeof item === 'string') {
+            return { url: item };
+        }
+        return item;
+    });
+}
 
 /**
  * Large comment volume threshold for warning (T039)
@@ -31,7 +44,7 @@ function validateInput(input: ActorInput): ValidatedInput {
     }
 
     return {
-        startUrls: input.startUrls,
+        startUrls: normalizeStartUrls(input.startUrls),
         maxComments: input.maxComments ?? INPUT_DEFAULTS.maxComments,
         commentsSortBy: input.commentsSortBy ?? INPUT_DEFAULTS.commentsSortBy,
         proxyConfiguration: input.proxyConfiguration ?? INPUT_DEFAULTS.proxyConfiguration,

@@ -3,7 +3,7 @@
   "name": "youtube-comments-scraper",
   "title": "YouTube Comments Scraper",
   "description": "Extracts all publicly visible comments from YouTube videos with full metadata including author, engagement metrics, and creator interactions.",
-  "version": "1.0.0",
+  "version": "1.0",
   "input": "./input_schema.json",
   "dockerfile": "./Dockerfile",
   "storages": {

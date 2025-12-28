@@ -8,22 +8,11 @@
     "startUrls": {
       "title": "Direct video URLs",
       "type": "array",
-      "description": "Enter a link to a specific YouTube video. You can also import a CSV file or Google Sheet with a list of URLs.",
+      "description": "Enter YouTube video URLs, one per line.",
       "prefill": [],
-      "editor": "requestListSources",
+      "editor": "stringList",
       "items": {
-        "type": "object",
-        "properties": {
-          "url": {
-            "type": "string",
-            "format": "uri"
-          },
-          "method": {
-            "type": "string",
-            "default": "GET"
-          }
-        },
-        "required": ["url"]
+        "type": "string"
       }
     },
     "maxComments": {
