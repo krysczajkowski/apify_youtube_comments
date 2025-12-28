@@ -84,8 +84,10 @@ export function extractVideoTitle(ytInitialData: Record<string, unknown>): strin
  */
 export function extractCommentsCount(ytInitialData: Record<string, unknown>): number | null {
     try {
-        // Path: contents.twoColumnWatchNextResults.results.results.contents[].itemSectionRenderer.contents[].commentsEntryPointHeaderRenderer.commentCount.simpleText
-        // or: engagementPanels[].engagementPanelSectionListRenderer.header.engagementPanelTitleHeaderRenderer.contextualInfo.runs[0].text
+        // Path: contents.twoColumnWatchNextResults.results.results.contents[]
+        //   .itemSectionRenderer.contents[].commentsEntryPointHeaderRenderer.commentCount.simpleText
+        // or: engagementPanels[].engagementPanelSectionListRenderer.header
+        //   .engagementPanelTitleHeaderRenderer.contextualInfo.runs[0].text
         const contents = (ytInitialData as Record<string, unknown>).contents as Record<string, unknown>;
         const twoColumn = contents?.twoColumnWatchNextResults as Record<string, unknown>;
         const results = twoColumn?.results as Record<string, unknown>;
@@ -153,7 +155,7 @@ export function parseCommentCount(countStr: string): number | null {
         const num = parseFloat(numStr);
         const suffix = suffixMatch[2]?.toUpperCase();
 
-        if (isNaN(num)) return null;
+        if (Number.isNaN(num)) return null;
 
         switch (suffix) {
             case 'K':
@@ -169,7 +171,7 @@ export function parseCommentCount(countStr: string): number | null {
 
     // Try direct parse
     const directNum = parseInt(cleaned.replace(/,/g, ''), 10);
-    return isNaN(directNum) ? null : directNum;
+    return Number.isNaN(directNum) ? null : directNum;
 }
 
 /**
@@ -178,7 +180,9 @@ export function parseCommentCount(countStr: string): number | null {
  */
 export function extractCommentsContinuationToken(ytInitialData: Record<string, unknown>): string | null {
     try {
-        // Path: contents.twoColumnWatchNextResults.results.results.contents[].itemSectionRenderer.contents[].continuationItemRenderer.continuationEndpoint.continuationCommand.token
+        // Path: contents.twoColumnWatchNextResults.results.results.contents[]
+        //   .itemSectionRenderer.contents[].continuationItemRenderer
+        //   .continuationEndpoint.continuationCommand.token
         const contents = (ytInitialData as Record<string, unknown>).contents as Record<string, unknown>;
         const twoColumn = contents?.twoColumnWatchNextResults as Record<string, unknown>;
         const results = twoColumn?.results as Record<string, unknown>;
@@ -254,7 +258,7 @@ export function extractCommentsContinuationToken(ytInitialData: Record<string, u
 export function extractVideoMetadata(
     html: string,
     videoId: string,
-    originalUrl: string
+    originalUrl: string,
 ): { metadata: VideoMetadata; continuationToken: string | null } | null {
     const ytInitialData = extractYtInitialData(html);
     if (!ytInitialData) {
@@ -305,9 +309,9 @@ export function areCommentsDisabled(ytInitialData: Record<string, unknown>): boo
                                 if (runs) {
                                     const message = runs.map((r) => r.text).join('').toLowerCase();
                                     if (
-                                        message.includes('comments are turned off') ||
-                                        message.includes('comments disabled') ||
-                                        message.includes('comments have been disabled')
+                                        message.includes('comments are turned off')
+                                        || message.includes('comments disabled')
+                                        || message.includes('comments have been disabled')
                                     ) {
                                         return true;
                                     }

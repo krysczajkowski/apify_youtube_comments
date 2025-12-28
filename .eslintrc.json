@@ -1,0 +1,12 @@
+{
+  "extends": "@apify/eslint-config-ts",
+  "root": true,
+  "parserOptions": {
+    "project": "./tsconfig.json"
+  },
+  "rules": {
+    "@typescript-eslint/space-before-function-paren": "off",
+    "max-classes-per-file": "off",
+    "no-loop-func": "off"
+  }
+}

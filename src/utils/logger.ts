@@ -79,7 +79,7 @@ export function logWarning(message: string, context?: LogContext): void {
 export function logError(
     message: string,
     error?: Error | unknown,
-    context?: LogContext
+    context?: LogContext,
 ): void {
     const errorMessage = error instanceof Error ? error.message : String(error || '');
     const fullMessage = errorMessage ? `${message}: ${errorMessage}` : message;
@@ -92,7 +92,7 @@ export function logError(
 export function logCategorizedError(
     message: string,
     category: ErrorCategory,
-    context?: LogContext
+    context?: LogContext,
 ): void {
     const contextWithCategory = { ...context, errorCategory: category };
 
@@ -132,7 +132,7 @@ export function logVideoComplete(
     videoId: string,
     commentCount: number,
     index: number,
-    total: number
+    total: number,
 ): void {
     logInfo(`Extracted ${commentCount} comments`, {
         videoId,
@@ -150,7 +150,7 @@ export function logVideoFailed(
     error: string,
     category: ErrorCategory,
     index: number,
-    total: number
+    total: number,
 ): void {
     logCategorizedError(`Failed to extract comments: ${error}`, category, {
         videoId,
@@ -166,7 +166,7 @@ export function logVideoFailed(
 export function logPaginationProgress(
     videoId: string,
     currentCount: number,
-    maxComments: number | null
+    maxComments: number | null,
 ): void {
     const limitInfo = maxComments && maxComments > 0 ? ` / ${maxComments}` : '';
     logDebug(`Fetched ${currentCount}${limitInfo} comments`, { videoId, commentCount: currentCount });
@@ -187,8 +187,8 @@ export function logRateLimit(videoId: string, retryAttempt: number, delayMs: num
  */
 export function logLargeVolumeWarning(videoId: string, commentsCount: number): void {
     logWarning(
-        `Video has ${commentsCount.toLocaleString()} comments. ` +
-        `Consider setting maxComments to limit extraction time and costs.`,
-        { videoId, commentCount: commentsCount }
+        `Video has ${commentsCount.toLocaleString()} comments. `
+        + `Consider setting maxComments to limit extraction time and costs.`,
+        { videoId, commentCount: commentsCount },
     );
 }

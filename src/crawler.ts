@@ -116,7 +116,7 @@ export class RateLimitError extends Error {
  */
 async function fetchVideoPage(
     videoId: string,
-    proxyConfiguration?: ProxyConfiguration
+    proxyConfiguration?: ProxyConfiguration,
 ): Promise<string> {
     const url = `${YOUTUBE_VIDEO_URL}?v=${videoId}`;
 
@@ -153,7 +153,7 @@ async function fetchVideoPage(
  */
 async function fetchComments(
     continuationToken: string,
-    proxyConfiguration?: ProxyConfiguration
+    proxyConfiguration?: ProxyConfiguration,
 ): Promise<Record<string, unknown>> {
     const proxyUrl = proxyConfiguration ? await proxyConfiguration.newUrl() : undefined;
 
@@ -193,7 +193,8 @@ async function fetchComments(
  */
 function getSortedContinuationToken(
     token: string,
-    _sortBy: CommentsSortBy
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    _sortBy: CommentsSortBy,
 ): string {
     // The sort order is typically embedded in the initial page load based on URL params
     // For now, we return the token as-is; YouTube's default behavior applies
@@ -241,7 +242,7 @@ export async function extractComments(options: ExtractCommentsOptions): Promise<
     } catch (error) {
         const category = classifyError(
             (error as { statusCode?: number }).statusCode ?? null,
-            (error as Error).message
+            (error as Error).message,
         );
         return {
             comments: [],
@@ -347,7 +348,7 @@ export async function extractComments(options: ExtractCommentsOptions): Promise<
         } catch (error) {
             const category = classifyError(
                 (error as { statusCode?: number }).statusCode ?? null,
-                (error as Error).message
+                (error as Error).message,
             );
 
             if (category === 'BLOCKED') {

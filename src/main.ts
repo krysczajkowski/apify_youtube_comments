@@ -71,7 +71,7 @@ function validateStartUrls(startUrls: StartUrl[]): {
  * Creates proxy configuration from input
  */
 async function createProxyConfig(
-    proxyConfig: ValidatedInput['proxyConfiguration']
+    proxyConfig: ValidatedInput['proxyConfiguration'],
 ): Promise<ProxyConfiguration | undefined> {
     if (!proxyConfig.useApifyProxy && !proxyConfig.proxyUrls?.length) {
         return undefined;
@@ -148,6 +148,7 @@ function generateRecommendations(videoStates: VideoState[], errors: ErrorSummary
 /**
  * Main Actor entry point
  */
+// eslint-disable-next-line @typescript-eslint/no-floating-promises
 Actor.main(async () => {
     const startTime = new Date();
     logInfo('YouTube Comments Scraper starting');
@@ -276,9 +277,9 @@ Actor.main(async () => {
 
                 // T039: Log warning for large video volumes if unlimited extraction
                 if (
-                    result.metadata.commentsCount &&
-                    result.metadata.commentsCount >= LARGE_VOLUME_THRESHOLD &&
-                    input.maxComments <= 0
+                    result.metadata.commentsCount
+                    && result.metadata.commentsCount >= LARGE_VOLUME_THRESHOLD
+                    && input.maxComments <= 0
                 ) {
                     logLargeVolumeWarning(urlInfo.videoId, result.metadata.commentsCount);
                 }

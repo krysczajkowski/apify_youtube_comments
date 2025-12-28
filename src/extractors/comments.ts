@@ -112,7 +112,7 @@ function parseVoteCount(voteCount?: CommentRenderer['voteCount']): number {
         const num = parseFloat(numStr);
         const suffix = suffixMatch[2]?.toUpperCase();
 
-        if (isNaN(num)) return 0;
+        if (Number.isNaN(num)) return 0;
 
         switch (suffix) {
             case 'K':
@@ -128,7 +128,7 @@ function parseVoteCount(voteCount?: CommentRenderer['voteCount']): number {
 
     // Try direct parse
     const directNum = parseInt(cleaned.replace(/,/g, ''), 10);
-    return isNaN(directNum) ? 0 : directNum;
+    return Number.isNaN(directNum) ? 0 : directNum;
 }
 
 /**
@@ -167,7 +167,7 @@ export function extractComment(
     renderer: CommentRenderer,
     metadata: VideoMetadata,
     type: CommentType = 'comment',
-    parentCid: string | null = null
+    parentCid: string | null = null,
 ): CommentOutput | null {
     const cid = renderer.commentId;
     if (!cid) return null;
@@ -200,7 +200,7 @@ export function extractComment(
  * Extracts reply continuation token from comment thread
  */
 export function extractReplyContinuationToken(
-    replies?: CommentThreadRenderer['replies']
+    replies?: CommentThreadRenderer['replies'],
 ): string | null {
     if (!replies?.commentRepliesRenderer?.contents) return null;
 
@@ -232,7 +232,7 @@ export interface ParseCommentsResult {
  */
 export function parseCommentsFromResponse(
     response: Record<string, unknown>,
-    metadata: VideoMetadata
+    metadata: VideoMetadata,
 ): ParseCommentsResult {
     const comments: CommentOutput[] = [];
     let nextContinuationToken: string | null = null;
@@ -280,7 +280,7 @@ function processCommentItems(
     metadata: VideoMetadata,
     comments: CommentOutput[],
     replyContinuationTokens: Map<string, string>,
-    onContinuationToken: (token: string) => void
+    onContinuationToken: (token: string) => void,
 ): void {
     for (const item of items) {
         // Comment thread
@@ -290,7 +290,7 @@ function processCommentItems(
                 commentThread.comment.commentRenderer as CommentRenderer,
                 metadata,
                 'comment',
-                null
+                null,
             );
             if (comment) {
                 comments.push(comment);
@@ -336,7 +336,7 @@ function processCommentItems(
 export function parseRepliesFromResponse(
     response: Record<string, unknown>,
     metadata: VideoMetadata,
-    parentCid: string
+    parentCid: string,
 ): { replies: CommentOutput[]; nextContinuationToken: string | null } {
     const replies: CommentOutput[] = [];
     let nextContinuationToken: string | null = null;

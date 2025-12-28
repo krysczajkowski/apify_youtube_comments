@@ -45,11 +45,11 @@ export function classifyError(statusCode: number | null, message?: string): Erro
     // Check message for permanent conditions
     const lowerMessage = (message || '').toLowerCase();
     if (
-        lowerMessage.includes('comments disabled') ||
-        lowerMessage.includes('comments are turned off') ||
-        lowerMessage.includes('private video') ||
-        lowerMessage.includes('video unavailable') ||
-        lowerMessage.includes('age-restricted')
+        lowerMessage.includes('comments disabled')
+        || lowerMessage.includes('comments are turned off')
+        || lowerMessage.includes('private video')
+        || lowerMessage.includes('video unavailable')
+        || lowerMessage.includes('age-restricted')
     ) {
         return 'PERMANENT';
     }
@@ -91,7 +91,7 @@ export function calculateBackoffDelay(attempt: number, options: RetryOptions = {
     const { baseDelayMs, maxDelayMs, jitterFactor } = { ...DEFAULT_RETRY_OPTIONS, ...options };
 
     // Exponential backoff: base * 2^attempt
-    const exponentialDelay = baseDelayMs * Math.pow(2, attempt);
+    const exponentialDelay = baseDelayMs * 2 ** attempt;
 
     // Cap at max delay
     const cappedDelay = Math.min(exponentialDelay, maxDelayMs);
@@ -130,7 +130,7 @@ export interface RetryResult<T> {
  */
 export async function withRetry<T>(
     fn: () => Promise<T>,
-    options: RetryOptions = {}
+    options: RetryOptions = {},
 ): Promise<RetryResult<T>> {
     const { maxRetries } = { ...DEFAULT_RETRY_OPTIONS, ...options };
 

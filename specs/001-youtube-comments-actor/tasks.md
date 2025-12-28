@@ -97,8 +97,8 @@
 
 ### Implementation for User Story 3
 
-- [ ] T029 [US3] Verify output schema compliance in src/extractors/comments.ts (all 14 required fields present with correct types)
-- [ ] T030 [US3] Add null/undefined handling in src/extractors/comments.ts (ensure no missing required fields in dataset output)
+- [x] T029 [US3] Verify output schema compliance in src/extractors/comments.ts (all 14 required fields present with correct types)
+- [x] T030 [US3] Add null/undefined handling in src/extractors/comments.ts (ensure no missing required fields in dataset output)
 
 **Checkpoint**: Dataset output compatible with all Apify export formats
 
@@ -114,9 +114,9 @@
 
 ### Implementation for User Story 4
 
-- [ ] T031 [US4] Verify date field extraction accuracy in src/extractors/comments.ts (relative format "2 days ago" preserved)
-- [ ] T032 [US4] Verify engagement metrics extraction in src/extractors/comments.ts (voteCount, replyCount parsed correctly from InnerTube response)
-- [ ] T033 [US4] Verify creator interaction flags in src/extractors/comments.ts (hasCreatorHeart detection from actionButtons, authorIsChannelOwner from commentRenderer)
+- [x] T031 [US4] Verify date field extraction accuracy in src/extractors/comments.ts (relative format "2 days ago" preserved)
+- [x] T032 [US4] Verify engagement metrics extraction in src/extractors/comments.ts (voteCount, replyCount parsed correctly from InnerTube response)
+- [x] T033 [US4] Verify creator interaction flags in src/extractors/comments.ts (hasCreatorHeart detection from actionButtons, authorIsChannelOwner from commentRenderer)
 
 **Checkpoint**: All analysis-relevant fields extracted accurately
 
@@ -126,13 +126,13 @@
 
 **Purpose**: Run summary, documentation, and cross-cutting improvements
 
-- [ ] T034 Implement run summary generation in src/main.ts (collect stats: totalVideos, successfulVideos, failedVideos, totalComments, durationSeconds)
-- [ ] T035 Write run summary to Key-Value Store in src/main.ts (key: "RUN_SUMMARY", format per contracts/run-summary-schema.json)
-- [ ] T036 [P] Add error categorization to run summary in src/main.ts (aggregate BLOCKED/TRANSIENT/PERMANENT errors with counts and sample URLs)
-- [ ] T037 [P] Add recommendations to run summary in src/main.ts (e.g., "Consider using residential proxies" if high BLOCKED count)
-- [ ] T038 Create README.md with quickstart, input/output documentation, troubleshooting guide
-- [ ] T039 [P] Add warning for large comment volumes in src/main.ts (log warning if video has 100k+ comments and no maxComments limit)
-- [ ] T040 Run quickstart.md validation (test minimal input example works end-to-end)
+- [x] T034 Implement run summary generation in src/main.ts (collect stats: totalVideos, successfulVideos, failedVideos, totalComments, durationSeconds)
+- [x] T035 Write run summary to Key-Value Store in src/main.ts (key: "RUN_SUMMARY", format per contracts/run-summary-schema.json)
+- [x] T036 [P] Add error categorization to run summary in src/main.ts (aggregate BLOCKED/TRANSIENT/PERMANENT errors with counts and sample URLs)
+- [x] T037 [P] Add recommendations to run summary in src/main.ts (e.g., "Consider using residential proxies" if high BLOCKED count)
+- [x] T038 Create README.md with quickstart, input/output documentation, troubleshooting guide
+- [x] T039 [P] Add warning for large comment volumes in src/main.ts (log warning if video has 100k+ comments and no maxComments limit)
+- [x] T040 Run quickstart.md validation (test minimal input example works end-to-end)
 
 ---
 
