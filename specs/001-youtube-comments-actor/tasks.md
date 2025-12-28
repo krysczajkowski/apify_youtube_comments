@@ -33,13 +33,13 @@
 
 **CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T006 Define TypeScript input types in src/types/input.ts matching contracts/input-schema.json
-- [ ] T007 [P] Define TypeScript output types in src/types/output.ts matching contracts/output-schema.json
-- [ ] T008 [P] Define TypeScript run summary types in src/types/run-summary.ts matching contracts/run-summary-schema.json
-- [ ] T009 Create URL validation and normalization utilities in src/utils/url.ts (YouTube URL patterns: watch?v=, youtu.be/, shorts/)
-- [ ] T010 [P] Create exponential backoff retry logic in src/utils/retry.ts (base 1000ms, max 30000ms, 3 retries, jitter)
-- [ ] T011 [P] Create structured logging utilities in src/utils/logger.ts (log levels, error categorization: BLOCKED/TRANSIENT/PERMANENT)
-- [ ] T012 Create Actor entry point skeleton in src/main.ts (input validation, proxy config, orchestration structure)
+- [x] T006 Define TypeScript input types in src/types/input.ts matching contracts/input-schema.json
+- [x] T007 [P] Define TypeScript output types in src/types/output.ts matching contracts/output-schema.json
+- [x] T008 [P] Define TypeScript run summary types in src/types/run-summary.ts matching contracts/run-summary-schema.json
+- [x] T009 Create URL validation and normalization utilities in src/utils/url.ts (YouTube URL patterns: watch?v=, youtu.be/, shorts/)
+- [x] T010 [P] Create exponential backoff retry logic in src/utils/retry.ts (base 1000ms, max 30000ms, 3 retries, jitter)
+- [x] T011 [P] Create structured logging utilities in src/utils/logger.ts (log levels, error categorization: BLOCKED/TRANSIENT/PERMANENT)
+- [x] T012 Create Actor entry point skeleton in src/main.ts (input validation, proxy config, orchestration structure)
 
 **Checkpoint**: Foundation ready - user story implementation can now begin
 
