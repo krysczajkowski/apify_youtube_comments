@@ -6,7 +6,7 @@
 import type { CommentOutput, CommentType, VideoMetadata } from '../types/output.js';
 
 /**
- * Raw comment renderer from InnerTube API
+ * Raw comment renderer from InnerTube API (legacy format)
  */
 interface CommentRenderer {
     commentId?: string;
@@ -32,6 +32,33 @@ interface CommentRenderer {
     publishedTimeText?: {
         runs?: Array<{ text: string }>;
         simpleText?: string;
+    };
+}
+
+/**
+ * T012: New commentEntityPayload format from InnerTube API
+ * Per research.md: YouTube is transitioning to entity-based payloads (May 2024 yt-dlp fix)
+ */
+interface CommentEntityPayload {
+    properties?: {
+        commentId?: string;
+        content?: {
+            content?: string;
+        };
+        publishedTime?: string;
+    };
+    author?: {
+        displayName?: string;
+        channelId?: string;
+        isCreator?: boolean;
+    };
+    toolbar?: {
+        likeCountA11y?: string;
+        likeCountLiked?: string;
+        replyCount?: string;
+    };
+    engagement?: {
+        likeCount?: number;
     };
 }
 
@@ -156,6 +183,113 @@ function hasCreatorHeart(actionButtons?: CommentRenderer['actionButtons']): bool
 }
 
 /**
+ * T013: Extracts vote count from toolbar.likeCountA11y in new format
+ * Per research.md: likeCountA11y contains text like "123 likes"
+ * Per data-model.md: Parse accessibility text to extract numeric count
+ */
+function parseVoteCountFromA11y(a11yText?: string): number {
+    if (!a11yText) return 0;
+
+    // Pattern: "123 likes", "1.2K likes", "No likes", etc.
+    const match = a11yText.match(/([\d,.]+[KMB]?)\s*like/i);
+    if (match) {
+        const cleaned = match[1].trim();
+
+        // Handle K/M/B suffixes
+        const suffixMatch = cleaned.match(/^([\d,.]+)\s*([KMB])?$/i);
+        if (suffixMatch) {
+            const numStr = suffixMatch[1].replace(/,/g, '');
+            const num = parseFloat(numStr);
+            const suffix = suffixMatch[2]?.toUpperCase();
+
+            if (Number.isNaN(num)) return 0;
+
+            switch (suffix) {
+                case 'K':
+                    return Math.round(num * 1000);
+                case 'M':
+                    return Math.round(num * 1000000);
+                case 'B':
+                    return Math.round(num * 1000000000);
+                default:
+                    return Math.round(num);
+            }
+        }
+    }
+
+    // Try extracting just numbers if no "like" pattern found
+    const numbersOnly = a11yText.replace(/[^0-9KMB,.]/gi, '').trim();
+    if (numbersOnly) {
+        const suffixMatch = numbersOnly.match(/^([\d,.]+)\s*([KMB])?$/i);
+        if (suffixMatch) {
+            const numStr = suffixMatch[1].replace(/,/g, '');
+            const num = parseFloat(numStr);
+            const suffix = suffixMatch[2]?.toUpperCase();
+
+            if (!Number.isNaN(num)) {
+                switch (suffix) {
+                    case 'K':
+                        return Math.round(num * 1000);
+                    case 'M':
+                        return Math.round(num * 1000000);
+                    case 'B':
+                        return Math.round(num * 1000000000);
+                    default:
+                        return Math.round(num);
+                }
+            }
+        }
+    }
+
+    return 0;
+}
+
+/**
+ * T012: Extracts a comment from new commentEntityPayload format
+ * Per research.md: New format has properties.commentId, properties.content.content, author.displayName, etc.
+ */
+function extractCommentFromEntityPayload(
+    payload: CommentEntityPayload,
+    metadata: VideoMetadata,
+    type: CommentType = 'comment',
+    parentCid: string | null = null,
+): CommentOutput | null {
+    const cid = payload.properties?.commentId;
+    if (!cid) return null;
+
+    const comment = payload.properties?.content?.content ?? '';
+    const author = payload.author?.displayName ?? '';
+
+    // Both comment text and author are required
+    if (!author) return null;
+
+    // Parse vote count from toolbar.likeCountA11y (T013)
+    const voteCount = parseVoteCountFromA11y(payload.toolbar?.likeCountA11y)
+        || (payload.engagement?.likeCount ?? 0);
+
+    // Parse reply count from toolbar
+    const replyCountStr = payload.toolbar?.replyCount ?? '0';
+    const replyCount = parseInt(replyCountStr.replace(/,/g, ''), 10) || 0;
+
+    return {
+        cid,
+        comment,
+        author,
+        videoId: metadata.videoId,
+        pageUrl: metadata.finalUrl,
+        title: metadata.title,
+        commentsCount: metadata.commentsCount ?? 0,
+        voteCount,
+        replyCount,
+        authorIsChannelOwner: payload.author?.isCreator ?? false,
+        hasCreatorHeart: false, // Not available in entity payload format
+        type,
+        replyToCid: parentCid,
+        date: payload.properties?.publishedTime ?? '',
+    };
+}
+
+/**
  * Extracts a single comment from commentRenderer
  * @param renderer - Raw commentRenderer object
  * @param metadata - Video metadata for context
@@ -225,7 +359,52 @@ export interface ParseCommentsResult {
 }
 
 /**
+ * T014: Extracts comments from frameworkUpdates.entityBatchUpdate.mutations
+ * Per research.md: New format stores comments in entityBatchUpdate.mutations[].payload.commentEntityPayload
+ */
+function extractFromFrameworkUpdates(
+    response: Record<string, unknown>,
+    metadata: VideoMetadata,
+    existingIds: Set<string>,
+): CommentOutput[] {
+    const comments: CommentOutput[] = [];
+
+    try {
+        const frameworkUpdates = response.frameworkUpdates as Record<string, unknown>;
+        const entityBatchUpdate = frameworkUpdates?.entityBatchUpdate as Record<string, unknown>;
+        const mutations = entityBatchUpdate?.mutations as Array<Record<string, unknown>>;
+
+        if (!mutations || !Array.isArray(mutations)) {
+            return comments;
+        }
+
+        for (const mutation of mutations) {
+            const payload = mutation?.payload as Record<string, unknown>;
+            const commentEntity = payload?.commentEntityPayload as CommentEntityPayload;
+
+            if (commentEntity?.properties?.commentId) {
+                // Skip if we already have this comment from legacy format
+                if (existingIds.has(commentEntity.properties.commentId)) {
+                    continue;
+                }
+
+                const comment = extractCommentFromEntityPayload(commentEntity, metadata, 'comment', null);
+                if (comment) {
+                    comments.push(comment);
+                    existingIds.add(comment.cid);
+                }
+            }
+        }
+    } catch {
+        // Return what we have on error
+    }
+
+    return comments;
+}
+
+/**
  * Parses comments from InnerTube API response
+ * Per T014: Check both legacy format and frameworkUpdates.entityBatchUpdate.mutations
  * @param response - Raw API response
  * @param metadata - Video metadata for context
  * @returns Parsed comments and continuation info
@@ -237,34 +416,42 @@ export function parseCommentsFromResponse(
     const comments: CommentOutput[] = [];
     let nextContinuationToken: string | null = null;
     const replyContinuationTokens = new Map<string, string>();
+    const seenIds = new Set<string>();
 
     try {
-        // Extract from onResponseReceivedEndpoints
+        // Extract from onResponseReceivedEndpoints (legacy format)
         const endpoints = response.onResponseReceivedEndpoints as Array<Record<string, unknown>> | undefined;
 
-        if (!endpoints) {
-            return { comments, nextContinuationToken, replyContinuationTokens };
-        }
+        if (endpoints) {
+            for (const endpoint of endpoints) {
+                // Try reloadContinuationItemsCommand (for initial load)
+                const reloadCommand = endpoint.reloadContinuationItemsCommand as Record<string, unknown>;
+                if (reloadCommand?.continuationItems) {
+                    const items = reloadCommand.continuationItems as Array<Record<string, unknown>>;
+                    processCommentItems(items, metadata, comments, replyContinuationTokens, (token) => {
+                        nextContinuationToken = token;
+                    });
+                }
 
-        for (const endpoint of endpoints) {
-            // Try reloadContinuationItemsCommand (for initial load)
-            const reloadCommand = endpoint.reloadContinuationItemsCommand as Record<string, unknown>;
-            if (reloadCommand?.continuationItems) {
-                const items = reloadCommand.continuationItems as Array<Record<string, unknown>>;
-                processCommentItems(items, metadata, comments, replyContinuationTokens, (token) => {
-                    nextContinuationToken = token;
-                });
-            }
-
-            // Try appendContinuationItemsAction (for pagination)
-            const appendAction = endpoint.appendContinuationItemsAction as Record<string, unknown>;
-            if (appendAction?.continuationItems) {
-                const items = appendAction.continuationItems as Array<Record<string, unknown>>;
-                processCommentItems(items, metadata, comments, replyContinuationTokens, (token) => {
-                    nextContinuationToken = token;
-                });
+                // Try appendContinuationItemsAction (for pagination)
+                const appendAction = endpoint.appendContinuationItemsAction as Record<string, unknown>;
+                if (appendAction?.continuationItems) {
+                    const items = appendAction.continuationItems as Array<Record<string, unknown>>;
+                    processCommentItems(items, metadata, comments, replyContinuationTokens, (token) => {
+                        nextContinuationToken = token;
+                    });
+                }
             }
         }
+
+        // Track IDs we already have
+        for (const comment of comments) {
+            seenIds.add(comment.cid);
+        }
+
+        // T014: Also check frameworkUpdates for new format (may have additional/richer data)
+        const entityComments = extractFromFrameworkUpdates(response, metadata, seenIds);
+        comments.push(...entityComments);
     } catch {
         // Return what we have on error
     }

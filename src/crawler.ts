@@ -15,28 +15,39 @@ import {
     extractCommentsCount,
     extractCommentsContinuationToken,
     areCommentsDisabled,
+    detectCommentsDisabledNoToken,
 } from './extractors/metadata.js';
 import { parseCommentsFromResponse, parseRepliesFromResponse, validateCommentOutput } from './extractors/comments.js';
-import { withRetry, classifyError } from './utils/retry.js';
-import { logDebug, logInfo, logWarning, logPaginationProgress, logRateLimit, logLargeVolumeWarning } from './utils/logger.js';
+import { withRetry, classifyError, getTimeoutActionableMessage } from './utils/retry.js';
+import { logDebug, logInfo, logWarning, logPaginationProgress, logRateLimit, logLargeVolumeWarning, logPartialResultsTimeout } from './utils/logger.js';
+
+/**
+ * InnerTube API key (mweb client key - stable and commonly used)
+ * Per research.md: Required for reliable API access
+ */
+const INNERTUBE_API_KEY = 'AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8';
 
 /**
  * InnerTube API context for YouTube requests
  * Client version should be updated periodically to match YouTube's web client
+ * Per research.md: Updated context with timeZone and utcOffsetMinutes
  */
 const INNERTUBE_CONTEXT = {
     client: {
         clientName: 'WEB',
-        clientVersion: '2.20251220.00.00',
+        clientVersion: '2.20250312.04.00',
         hl: 'en',
         gl: 'US',
+        timeZone: 'UTC',
+        utcOffsetMinutes: 0,
     },
 };
 
 /**
  * InnerTube API endpoints
+ * Per research.md: API key required as query parameter
  */
-const INNERTUBE_API_URL = 'https://www.youtube.com/youtubei/v1/next';
+const INNERTUBE_API_URL = `https://www.youtube.com/youtubei/v1/next?key=${INNERTUBE_API_KEY}`;
 const YOUTUBE_VIDEO_URL = 'https://www.youtube.com/watch';
 
 /**
@@ -44,6 +55,20 @@ const YOUTUBE_VIDEO_URL = 'https://www.youtube.com/watch';
  * Per T039: warn if video has 100k+ comments and no maxComments limit
  */
 const LARGE_VOLUME_THRESHOLD = 100000;
+
+/**
+ * Timeout constants for fast response time (T015-T017)
+ * Per spec: First batch within 30s, total extraction max 5 minutes
+ */
+const REQUEST_TIMEOUT_MS = 10000; // 10 seconds per request
+const TOTAL_EXTRACTION_TIMEOUT_MS = 300000; // 5 minutes total extraction
+const FIRST_BATCH_DEADLINE_MS = 30000; // 30 seconds for first batch
+
+/**
+ * Empty response threshold for early termination (T021)
+ * Per research.md: abort after 3 consecutive empty pages
+ */
+const MAX_CONSECUTIVE_EMPTY_PAGES = 3;
 
 /**
  * Options for comment extraction
@@ -97,6 +122,7 @@ export class CommentsDisabledError extends Error {
 
 /**
  * Custom error for rate limiting
+ * T025: Includes actionable message about proxies
  */
 export class RateLimitError extends Error {
     statusCode: number;
@@ -105,6 +131,19 @@ export class RateLimitError extends Error {
         super(message);
         this.name = 'RateLimitError';
         this.statusCode = statusCode;
+    }
+
+    /**
+     * Returns user-friendly error message with proxy suggestion
+     */
+    static getActionableMessage(statusCode: number): string {
+        if (statusCode === 429) {
+            return 'Rate limited by YouTube - consider using proxies or reducing request frequency';
+        }
+        if (statusCode === 403) {
+            return 'Access denied by YouTube - try using proxies or wait before retrying';
+        }
+        return `YouTube API error (${statusCode}) - consider using proxies`;
     }
 }
 
@@ -126,6 +165,9 @@ async function fetchVideoPage(
         url,
         proxyUrl,
         responseType: 'text',
+        timeout: {
+            request: REQUEST_TIMEOUT_MS,
+        },
         headers: {
             'Accept-Language': 'en-US,en;q=0.9',
             Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
@@ -166,6 +208,9 @@ async function fetchComments(
             continuation: continuationToken,
         },
         responseType: 'json',
+        timeout: {
+            request: REQUEST_TIMEOUT_MS,
+        },
         headers: {
             'Content-Type': 'application/json',
             Origin: 'https://www.youtube.com',
@@ -301,6 +346,19 @@ export async function extractComments(options: ExtractCommentsOptions): Promise<
     }
 
     if (!continuationToken) {
+        // T023/T024: Check if comments are disabled when no token found
+        if (detectCommentsDisabledNoToken(ytInitialData)) {
+            logInfo(`Comments are disabled for this video`, { videoId });
+            return {
+                comments: [],
+                metadata,
+                commentCount: 0,
+                replyCount: 0,
+                completed: true,
+                error: 'Comments are disabled for this video',
+                errorCategory: 'PERMANENT',
+            };
+        }
         logInfo(`No comments found or comments section not available`, { videoId });
         return {
             comments: [],
@@ -311,13 +369,34 @@ export async function extractComments(options: ExtractCommentsOptions): Promise<
         };
     }
 
-    // Apply sort order to token (T019)
+    // Apply sort order to token
     continuationToken = getSortedContinuationToken(continuationToken, sortBy);
 
-    // Step 2: Paginate through comments (T017)
+    // Step 2: Paginate through comments with timeout enforcement (T019-T022)
     const replyContinuationTokens = new Map<string, string>();
+    const extractionStartTime = Date.now(); // T019: Track extraction start
+    let consecutiveEmptyPages = 0; // T021: Track empty responses
+    let timedOut = false; // T022: Track timeout status
+    let firstBatchReceived = false; // Track first batch for deadline
 
     while (continuationToken && comments.length < effectiveMaxComments) {
+        // T020: Check total timeout at start of each iteration
+        const elapsedMs = Date.now() - extractionStartTime;
+        if (elapsedMs >= TOTAL_EXTRACTION_TIMEOUT_MS) {
+            // T027: Structured warning for partial results due to timeout
+            logPartialResultsTimeout(videoId, comments.length, 'total', elapsedMs);
+            timedOut = true;
+            break;
+        }
+
+        // Check first batch deadline (only before first comments arrive)
+        if (!firstBatchReceived && elapsedMs >= FIRST_BATCH_DEADLINE_MS) {
+            // T027: Structured warning for first batch deadline timeout
+            logPartialResultsTimeout(videoId, comments.length, 'first_batch', elapsedMs);
+            timedOut = true;
+            break;
+        }
+
         try {
             const result = await withRetry(() => fetchComments(continuationToken!, proxyConfiguration));
 
@@ -328,6 +407,19 @@ export async function extractComments(options: ExtractCommentsOptions): Promise<
             }
 
             const parsed = parseCommentsFromResponse(result.data, metadata);
+            const newCommentsCount = parsed.comments.length;
+
+            // T021: Track consecutive empty pages
+            if (newCommentsCount === 0) {
+                consecutiveEmptyPages++;
+                if (consecutiveEmptyPages >= MAX_CONSECUTIVE_EMPTY_PAGES) {
+                    logWarning(`${MAX_CONSECUTIVE_EMPTY_PAGES} consecutive empty pages - aborting pagination`, { videoId });
+                    break;
+                }
+            } else {
+                consecutiveEmptyPages = 0; // Reset counter on successful page
+                firstBatchReceived = true; // Mark first batch received
+            }
 
             // Add valid comments
             for (const comment of parsed.comments) {
@@ -346,24 +438,39 @@ export async function extractComments(options: ExtractCommentsOptions): Promise<
 
             continuationToken = parsed.nextContinuationToken;
         } catch (error) {
-            const category = classifyError(
-                (error as { statusCode?: number }).statusCode ?? null,
-                (error as Error).message,
-            );
+            const statusCode = (error as { statusCode?: number }).statusCode ?? null;
+            const errorMessage = (error as Error).message;
+            const category = classifyError(statusCode, errorMessage);
 
-            if (category === 'BLOCKED') {
+            // T025: Provide actionable error message for rate limits
+            if (category === 'BLOCKED' && statusCode) {
+                const actionableMessage = RateLimitError.getActionableMessage(statusCode);
                 logRateLimit(videoId, 0, 0);
+                logWarning(actionableMessage, { videoId, errorCategory: category, statusCode });
+            } else if (category === 'TRANSIENT' && !statusCode) {
+                // T026: Provide actionable message for timeout/network errors
+                const actionableMessage = getTimeoutActionableMessage(errorMessage);
+                logWarning(actionableMessage, { videoId, errorCategory: category });
+            } else {
+                logWarning(`Error during pagination: ${errorMessage}`, { videoId, errorCategory: category });
             }
-
-            logWarning(`Error during pagination: ${(error as Error).message}`, { videoId, errorCategory: category });
             break;
         }
     }
 
-    // Step 3: Extract replies (T018)
-    if (includeReplies && comments.length < effectiveMaxComments) {
+    // Step 3: Extract replies with timeout enforcement
+    if (includeReplies && comments.length < effectiveMaxComments && !timedOut) {
         for (const [parentCid, replyToken] of replyContinuationTokens) {
             if (comments.length >= effectiveMaxComments) break;
+
+            // Check timeout before processing each parent's replies
+            const elapsedMs = Date.now() - extractionStartTime;
+            if (elapsedMs >= TOTAL_EXTRACTION_TIMEOUT_MS) {
+                // T027: Structured warning for timeout during reply extraction
+                logPartialResultsTimeout(videoId, comments.length, 'total', elapsedMs);
+                timedOut = true;
+                break;
+            }
 
             const parentComment = comments.find((c) => c.cid === parentCid);
             if (!parentComment || parentComment.replyCount === 0) continue;
@@ -371,6 +478,15 @@ export async function extractComments(options: ExtractCommentsOptions): Promise<
             let currentReplyToken: string | null = replyToken;
 
             while (currentReplyToken && comments.length < effectiveMaxComments) {
+                // Check timeout at each reply page
+                const replyElapsedMs = Date.now() - extractionStartTime;
+                if (replyElapsedMs >= TOTAL_EXTRACTION_TIMEOUT_MS) {
+                    // T027: Structured warning for timeout during reply pagination
+                    logPartialResultsTimeout(videoId, comments.length, 'total', replyElapsedMs);
+                    timedOut = true;
+                    break;
+                }
+
                 try {
                     const result = await withRetry(() => fetchComments(currentReplyToken!, proxyConfiguration));
 
@@ -394,10 +510,16 @@ export async function extractComments(options: ExtractCommentsOptions): Promise<
                     break;
                 }
             }
+
+            if (timedOut) break;
         }
     }
 
-    const completed = !continuationToken || comments.length >= effectiveMaxComments;
+    // T022: Return partial results - completed is false if timed out or more pages exist
+    const completed = !timedOut && (!continuationToken || comments.length >= effectiveMaxComments);
+
+    // T027: Note - structured timeout warnings are logged at the point of timeout
+    // No additional warning needed here as logPartialResultsTimeout was already called
 
     return {
         comments,

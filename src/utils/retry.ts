@@ -82,6 +82,33 @@ export function shouldRetry(category: ErrorCategory): boolean {
 }
 
 /**
+ * T026: Returns actionable error message for timeout and network errors
+ * @param message - Original error message
+ * @returns User-friendly message with retry suggestion
+ */
+export function getTimeoutActionableMessage(message: string): string {
+    const lowerMessage = message.toLowerCase();
+
+    if (lowerMessage.includes('timeout')) {
+        return 'Request timed out - the video may have many comments. Try setting a lower maxComments limit or retry later';
+    }
+
+    if (lowerMessage.includes('econnreset') || lowerMessage.includes('connection reset')) {
+        return 'Connection was reset - this may be a temporary network issue. Please retry';
+    }
+
+    if (lowerMessage.includes('enotfound') || lowerMessage.includes('getaddrinfo')) {
+        return 'Network error - unable to reach YouTube. Check your internet connection and retry';
+    }
+
+    if (lowerMessage.includes('socket') || lowerMessage.includes('network')) {
+        return 'Network error occurred - please check your connection and retry';
+    }
+
+    return `Network error: ${message} - please retry`;
+}
+
+/**
  * Calculates delay with exponential backoff and jitter
  * @param attempt - Current attempt number (0-indexed)
  * @param options - Retry configuration
