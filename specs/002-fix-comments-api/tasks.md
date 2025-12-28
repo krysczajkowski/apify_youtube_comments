@@ -103,12 +103,12 @@
 
 **Purpose**: Final validation and cleanup
 
-- [ ] T028 Run quickstart.md verification checklist
-- [ ] T029 [P] Run npm run build to verify no compilation errors
-- [ ] T030 [P] Run npm run lint to verify no linting issues
-- [ ] T031 Manual test: Video with public comments returns comments within 30 seconds
-- [ ] T032 Manual test: Video with disabled comments reports error within 10 seconds
-- [ ] T033 Manual test: maxComments limit is respected
+- [X] T028 Run quickstart.md verification checklist
+- [X] T029 [P] Run npm run build to verify no compilation errors
+- [X] T030 [P] Run npm run lint to verify no linting issues
+- [X] T031 Manual test: Video with public comments returns comments within 30 seconds
+- [X] T032 Manual test: Video with disabled comments reports error within 10 seconds
+- [X] T033 Manual test: maxComments limit is respected
 
 ---
 

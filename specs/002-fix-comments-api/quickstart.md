@@ -98,8 +98,8 @@ npm run build && npx apify run --input='{"startUrls":["https://www.youtube.com/w
 
 ## Verification Checklist
 
-- [ ] Comments returned for video with public comments
-- [ ] "Comments disabled" detected within 10 seconds
-- [ ] Extraction completes within 5 minutes
-- [ ] maxComments limit respected
-- [ ] No infinite loops on empty responses
+- [X] Comments returned for video with public comments
+- [X] "Comments disabled" detected within 10 seconds
+- [X] Extraction completes within 5 minutes
+- [X] maxComments limit respected
+- [X] No infinite loops on empty responses
