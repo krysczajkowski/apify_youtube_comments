@@ -175,71 +175,155 @@ export function parseCommentCount(countStr: string): number | null {
 }
 
 /**
- * Extracts the initial comments continuation token from ytInitialData
- * This token is used to fetch the first batch of comments
+ * T009: Checks if an engagement panel is the comments section
+ * Per research.md: Look for panelIdentifier === "comment-item-section" or header containing "Comments"
  */
-export function extractCommentsContinuationToken(ytInitialData: Record<string, unknown>): string | null {
-    try {
-        // Path: contents.twoColumnWatchNextResults.results.results.contents[]
-        //   .itemSectionRenderer.contents[].continuationItemRenderer
-        //   .continuationEndpoint.continuationCommand.token
-        const contents = (ytInitialData as Record<string, unknown>).contents as Record<string, unknown>;
-        const twoColumn = contents?.twoColumnWatchNextResults as Record<string, unknown>;
-        const results = twoColumn?.results as Record<string, unknown>;
-        const resultsInner = results?.results as Record<string, unknown>;
-        const contentsArray = resultsInner?.contents as Array<Record<string, unknown>>;
+function isCommentsPanel(panel: Record<string, unknown>): boolean {
+    const sectionList = panel?.engagementPanelSectionListRenderer as Record<string, unknown>;
+    if (!sectionList) return false;
 
-        if (contentsArray) {
-            for (const item of contentsArray) {
-                const itemSection = item?.itemSectionRenderer as Record<string, unknown>;
-                if (itemSection) {
-                    const sectionContents = itemSection.contents as Array<Record<string, unknown>>;
-                    if (sectionContents) {
-                        for (const content of sectionContents) {
-                            const continuation = content?.continuationItemRenderer as Record<string, unknown>;
-                            if (continuation) {
-                                const endpoint = continuation.continuationEndpoint as Record<string, unknown>;
-                                const command = endpoint?.continuationCommand as Record<string, unknown>;
-                                if (command?.token) {
-                                    return command.token as string;
-                                }
-                            }
+    // Check panelIdentifier first (most reliable)
+    if (sectionList.panelIdentifier === 'comment-item-section') {
+        return true;
+    }
+
+    // Fallback: check header text for "Comments"
+    const header = sectionList.header as Record<string, unknown>;
+    const titleHeader = header?.engagementPanelTitleHeaderRenderer as Record<string, unknown>;
+    const title = titleHeader?.title as Record<string, unknown>;
+    const runs = title?.runs as Array<{ text: string }>;
+    if (runs) {
+        const titleText = runs.map((r) => r.text).join('').toLowerCase();
+        if (titleText.includes('comment')) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+/**
+ * T010: Traverses engagement panel structure to find continuation token
+ * Per data-model.md: Path is engagementPanels[].engagementPanelSectionListRenderer
+ *   .content.sectionListRenderer.contents[].itemSectionRenderer.contents[]
+ *   .continuationItemRenderer.continuationEndpoint.continuationCommand.token
+ */
+function extractTokenFromEngagementPanel(panel: Record<string, unknown>): string | null {
+    const sectionList = panel?.engagementPanelSectionListRenderer as Record<string, unknown>;
+    if (!sectionList) return null;
+
+    const content = sectionList.content as Record<string, unknown>;
+    const sectionListRenderer = content?.sectionListRenderer as Record<string, unknown>;
+    const sectionContents = sectionListRenderer?.contents as Array<Record<string, unknown>>;
+
+    if (!sectionContents) return null;
+
+    for (const section of sectionContents) {
+        const itemSection = section?.itemSectionRenderer as Record<string, unknown>;
+        if (itemSection) {
+            const innerContents = itemSection.contents as Array<Record<string, unknown>>;
+            if (innerContents) {
+                for (const innerItem of innerContents) {
+                    const continuation = innerItem?.continuationItemRenderer as Record<string, unknown>;
+                    if (continuation) {
+                        const endpoint = continuation.continuationEndpoint as Record<string, unknown>;
+                        const command = endpoint?.continuationCommand as Record<string, unknown>;
+                        if (command?.token) {
+                            return command.token as string;
                         }
                     }
                 }
             }
         }
+    }
 
-        // Also check engagement panels for continuation
-        const engagementPanels = ytInitialData.engagementPanels as Array<Record<string, unknown>>;
-        if (engagementPanels) {
-            for (const panel of engagementPanels) {
-                const sectionList = panel?.engagementPanelSectionListRenderer as Record<string, unknown>;
-                const content = sectionList?.content as Record<string, unknown>;
-                const sectionListRenderer = content?.sectionListRenderer as Record<string, unknown>;
-                const sectionContents = sectionListRenderer?.contents as Array<Record<string, unknown>>;
+    return null;
+}
 
-                if (sectionContents) {
-                    for (const section of sectionContents) {
-                        const itemSection = section?.itemSectionRenderer as Record<string, unknown>;
-                        if (itemSection) {
-                            const innerContents = itemSection.contents as Array<Record<string, unknown>>;
-                            if (innerContents) {
-                                for (const innerItem of innerContents) {
-                                    const continuation = innerItem?.continuationItemRenderer as Record<string, unknown>;
-                                    if (continuation) {
-                                        const endpoint = continuation.continuationEndpoint as Record<string, unknown>;
-                                        const command = endpoint?.continuationCommand as Record<string, unknown>;
-                                        if (command?.token) {
-                                            return command.token as string;
-                                        }
-                                    }
-                                }
-                            }
+/**
+ * T009: Extracts continuation token from engagement panels array
+ * Per research.md: Search engagementPanels for panelIdentifier "comment-item-section"
+ */
+function extractFromEngagementPanels(ytInitialData: Record<string, unknown>): string | null {
+    const engagementPanels = ytInitialData.engagementPanels as Array<Record<string, unknown>>;
+    if (!engagementPanels || !Array.isArray(engagementPanels)) {
+        return null;
+    }
+
+    // First pass: find comments panel specifically
+    for (const panel of engagementPanels) {
+        if (isCommentsPanel(panel)) {
+            const token = extractTokenFromEngagementPanel(panel);
+            if (token) {
+                return token;
+            }
+        }
+    }
+
+    // Second pass: check all panels (fallback)
+    for (const panel of engagementPanels) {
+        const token = extractTokenFromEngagementPanel(panel);
+        if (token) {
+            return token;
+        }
+    }
+
+    return null;
+}
+
+/**
+ * Extracts continuation token from legacy results section
+ * Per research.md: Path is contents.twoColumnWatchNextResults.results.results.contents[]
+ *   .itemSectionRenderer.contents[].continuationItemRenderer
+ */
+function extractFromLegacyPath(ytInitialData: Record<string, unknown>): string | null {
+    const contents = ytInitialData.contents as Record<string, unknown>;
+    const twoColumn = contents?.twoColumnWatchNextResults as Record<string, unknown>;
+    const results = twoColumn?.results as Record<string, unknown>;
+    const resultsInner = results?.results as Record<string, unknown>;
+    const contentsArray = resultsInner?.contents as Array<Record<string, unknown>>;
+
+    if (!contentsArray) return null;
+
+    for (const item of contentsArray) {
+        const itemSection = item?.itemSectionRenderer as Record<string, unknown>;
+        if (itemSection) {
+            const sectionContents = itemSection.contents as Array<Record<string, unknown>>;
+            if (sectionContents) {
+                for (const content of sectionContents) {
+                    const continuation = content?.continuationItemRenderer as Record<string, unknown>;
+                    if (continuation) {
+                        const endpoint = continuation.continuationEndpoint as Record<string, unknown>;
+                        const command = endpoint?.continuationCommand as Record<string, unknown>;
+                        if (command?.token) {
+                            return command.token as string;
                         }
                     }
                 }
             }
+        }
+    }
+
+    return null;
+}
+
+/**
+ * T011: Extracts the initial comments continuation token from ytInitialData
+ * Per research.md: Try engagement panels first (newer format), then fall back to legacy path
+ * This token is used to fetch the first batch of comments
+ */
+export function extractCommentsContinuationToken(ytInitialData: Record<string, unknown>): string | null {
+    try {
+        // Per T011: Try engagement panels first (newer YouTube format)
+        const engagementToken = extractFromEngagementPanels(ytInitialData);
+        if (engagementToken) {
+            return engagementToken;
+        }
+
+        // Fall back to legacy path
+        const legacyToken = extractFromLegacyPath(ytInitialData);
+        if (legacyToken) {
+            return legacyToken;
         }
     } catch {
         // Return null on any error

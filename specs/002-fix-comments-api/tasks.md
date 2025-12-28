@@ -49,12 +49,12 @@
 
 ### Implementation for User Story 1
 
-- [ ] T009 [US1] Add engagement panels continuation token extraction function in src/extractors/metadata.ts that searches engagementPanels array for panelIdentifier "comment-item-section"
-- [ ] T010 [US1] Add helper to traverse engagement panel structure to find continuationItemRenderer.continuationEndpoint.continuationCommand.token in src/extractors/metadata.ts
-- [ ] T011 [US1] Update extractCommentsContinuationToken to try engagement panels first, then fall back to legacy path in src/extractors/metadata.ts
-- [ ] T012 [US1] Add support for commentEntityPayload format parsing (new format) alongside existing commentRenderer in src/extractors/comments.ts
-- [ ] T013 [US1] Add helper function to extract vote count from toolbar.likeCountA11y in new format in src/extractors/comments.ts
-- [ ] T014 [US1] Update comment extraction to check frameworkUpdates.entityBatchUpdate.mutations for new format in src/extractors/comments.ts
+- [X] T009 [US1] Add engagement panels continuation token extraction function in src/extractors/metadata.ts that searches engagementPanels array for panelIdentifier "comment-item-section"
+- [X] T010 [US1] Add helper to traverse engagement panel structure to find continuationItemRenderer.continuationEndpoint.continuationCommand.token in src/extractors/metadata.ts
+- [X] T011 [US1] Update extractCommentsContinuationToken to try engagement panels first, then fall back to legacy path in src/extractors/metadata.ts
+- [X] T012 [US1] Add support for commentEntityPayload format parsing (new format) alongside existing commentRenderer in src/extractors/comments.ts
+- [X] T013 [US1] Add helper function to extract vote count from toolbar.likeCountA11y in new format in src/extractors/comments.ts
+- [X] T014 [US1] Update comment extraction to check frameworkUpdates.entityBatchUpdate.mutations for new format in src/extractors/comments.ts
 
 **Checkpoint**: At this point, comments should be successfully extracted from videos with public comments
 
