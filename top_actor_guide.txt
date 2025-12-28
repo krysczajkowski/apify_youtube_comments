@@ -1,0 +1,420 @@
+Guide: Attributes of a Top-Performing, High-Adoption Apify Actor (LLM Blueprint)
+0) Product mindset: what “best performing” means on Apify
+
+A top actor wins because it simultaneously optimizes for:
+
+Reliability (success rate stays high over time on real-world targets)
+
+Performance (fast, low compute, scalable concurrency)
+
+Usability (first run succeeds; input is obvious; output is consistent)
+
+Maintenance velocity (fixes shipped quickly when targets change)
+
+Trust (clear docs, predictable pricing/cost, transparent limitations)
+
+Success is not just code quality — it’s outcomes: fewer failed runs, less user fiddling, lower cost per record, and fewer support requests.
+
+1) Core differentiators (what top actors have that average ones don’t)
+A. Reliability & anti-blocking sophistication
+
+Top actors:
+
+Prefer HTTP/cheerio for speed, but use browser fallback when required.
+
+Handle blocking proactively:
+
+proxy support (Apify Proxy + custom proxies)
+
+session rotation (cookie / login sessions if needed)
+
+adaptive delays & backoff
+
+detection: captcha pages, 403/429 spikes, empty/JS shells
+
+Use error classification and tailored retries:
+
+transient (timeouts, 5xx) → retry with exponential backoff + jitter
+
+blocked (403/429/captcha patterns) → slow down + rotate proxy/session + optional browser
+
+permanent (404/invalid input) → no retry; record failure cleanly
+
+Do partial success: one bad URL never kills a run; failures are logged and summarized.
+
+Average actors often:
+
+have “retry everything” or “fail fast”
+
+lack blocking detection
+
+require users to figure out proxies and limits through trial-and-error
+
+B. Performance: speed + cost efficiency
+
+Top actors:
+
+Use fast path by default (HTTP crawler, limited DOM parsing, selective extraction).
+
+Use the browser sparingly and efficiently:
+
+block images/fonts/media by default
+
+avoid full-page screenshots unless requested
+
+low concurrency for browser; higher concurrency for HTTP
+
+Scale correctly:
+
+request queue + dedupe + canonicalization
+
+concurrency caps + autoscaling or adaptive concurrency
+
+memory-safe streaming to dataset (don’t keep huge arrays)
+
+Provide predictable cost per result (low compute waste; fewer retries; no infinite loops).
+
+Average actors often:
+
+always use Playwright (slow, expensive)
+
+re-fetch pages unnecessarily
+
+parse huge HTML into memory
+
+create massive logs and slow themselves down
+
+C. Great input UX: “simple first run, advanced power when needed”
+
+Top actors:
+
+Have sane defaults so a user can run with only:
+
+startUrls (or a query + location), and hit Start.
+
+Keep input minimal & guided:
+
+clear descriptions, examples, and field grouping
+
+safe defaults for concurrency, timeouts, retries
+
+explicit toggles for expensive features (deep crawl, browser mode, full HTML, screenshots)
+
+Support multiple input styles:
+
+startUrls editor
+
+urls[] list
+
+search mode (keywords)
+
+optional sitemap ingestion
+
+Validate input early with actionable errors.
+
+Average actors often:
+
+overwhelm users with too many required fields
+
+have cryptic input names and no examples
+
+don’t validate and crash mid-run
+
+D. Output schema: stable, structured, integration-ready
+
+Top actors:
+
+Produce a consistent JSON schema across runs.
+
+Include:
+
+identifiers: url, finalUrl, statusCode, fetchedAt
+
+extracted fields: title, text, structured data
+
+metadata: og tags, description (optional)
+
+provenance: method used (http vs browser), response time
+
+Provide optional formats (CSV/JSON/Excel handled by Apify exports) but keep JSON clean.
+
+Write a run summary to KV store:
+
+counts (success/failed/blocked/retried)
+
+avg timings, throughput, top errors
+
+recommended settings if block rate was high
+
+Average actors often:
+
+output inconsistent fields
+
+change schemas between versions
+
+don’t include enough context to debug failures
+
+2) Technical architecture best practices (how top actors are built)
+A. Two-lane execution model (fast-path + fallback)
+
+Best pattern:
+
+Lane 1: HTTP/Cheerio (default)
+
+Lane 2: Browser (conditional)
+Fallback triggers (auto mode):
+
+content is empty / JS shell detected
+
+selectors yield no results
+
+blocked/captcha detected
+
+user forces browser
+
+This single architectural choice is one of the biggest performance wins on Apify.
+
+B. Robust crawl control
+
+Top actors implement:
+
+RequestQueue with:
+
+dedupe (normalize/canonicalize URLs)
+
+depth/limit control (maxRequestsPerCrawl)
+
+optional link enqueue rules (same-domain / regex / globs)
+
+deterministic pagination:
+
+stop conditions
+
+maximum pages safeguards
+
+polite crawling:
+
+rate limiting, concurrency controls, random jitter
+
+C. Error handling that helps users
+
+Top actors:
+
+never throw raw exceptions to the user
+
+log structured errors with:
+
+category (BLOCKED/TRANSIENT/PERMANENT)
+
+url and short message
+
+hint on how to fix (proxy, cookies, lower concurrency)
+
+keep a “failures dataset” or at least record failed URLs + reason in summary.
+
+D. Observability & self-diagnosis
+
+Top actors add:
+
+metrics counters:
+
+success rate, block rate, retry rate
+
+median/avg response time
+
+items per minute
+
+final summary in KV store and logs
+
+debug mode to increase log detail without spamming by default
+
+Users love actors that tell them exactly what to change.
+
+3) Documentation & onboarding (what marketplace winners do)
+A. README structure that converts users
+
+Top actors’ READMEs consistently have:
+
+What it does (bullets)
+
+Use cases (bullets)
+
+Quickstart (copy-paste input)
+
+Inputs explained (plain language + tips)
+
+Output schema (sample output)
+
+Performance/cost guidance (how to make it cheap & fast)
+
+Anti-blocking guidance (proxy, sessions, safe rates)
+
+Troubleshooting (top 5 issues + fixes)
+
+Changelog / maintenance expectations
+
+Legal/compliance note
+
+B. Examples that match real user tasks
+
+Include at least:
+
+Minimal run (3 pages)
+
+Realistic run (hundreds/thousands + proxy + concurrency tuned)
+
+If site-specific: examples for each common mode (search, listing, detail pages)
+
+C. Clarity about limitations
+
+Top actors explicitly state:
+
+what they don’t scrape
+
+what requires login
+
+what may be blocked without proxies
+
+expected throughput ranges
+This reduces negative reviews.
+
+4) Pricing/value cues (even if you don’t set price)
+
+Whether free or paid, successful actors:
+
+minimize “wasted compute” (the real cost)
+
+avoid default settings that burn credits accidentally
+
+put expensive features behind toggles
+
+recommend “cheap mode” vs “deep mode”
+
+explain cost drivers in README:
+
+browser usage
+
+high concurrency with proxies
+
+deep crawling
+
+Users reward actors that feel predictable and efficient.
+
+5) Maintenance practices that correlate with sustained popularity
+
+Top actors:
+
+ship updates quickly when targets change
+
+keep backward-compatible outputs (or version schema changes clearly)
+
+respond to issues fast (and update README when confusion is common)
+
+maintain a short changelog
+
+add guardrails as new failure modes appear
+
+A good actor is never “done”; it’s a maintained product.
+
+6) Integration capabilities common among top actors
+
+Top actors are “workflow-friendly”:
+
+dataset output that works in:
+
+Zapier/Make via Apify API
+
+webhooks (on success/failure)
+
+exports (CSV/Excel) without extra shaping
+
+optional webhooks/events documented
+
+clear mapping from input → output suitable for downstream automation
+
+7) Competitive differentiation in crowded categories (replicable playbook)
+
+When many actors do similar things, winners usually win via one of:
+
+Reliability proof: “works without breaking” + maintained
+
+Speed/cost: faster per item, lower compute
+
+Depth: more fields (e.g., emails, reviews, images) without extra tools
+
+UX: easiest to configure, best examples, best troubleshooting
+
+Specialization: “X + email”, “X + reviews”, “X for RAG-ready text”
+
+Bundle/workflow: outputs designed to chain into another step
+
+Pick 1–2 differentiators and make them obvious in title/description/README.
+
+8) Concrete implementation checklist (Claude Code should follow while coding)
+
+This is the “build standard” checklist:
+
+Reliability
+
+ Proxy + session support (documented)
+
+ Blocking detection + tailored mitigation
+
+ Error classification + smart retries
+
+ Partial failure tolerance
+
+ Clear run summary + failure list
+
+Performance
+
+ HTTP-first path
+
+ Browser only if needed + resource blocking
+
+ Concurrency defaults safe and fast
+
+ Memory-safe streaming writes
+
+ Dedupe/canonicalize URLs
+
+ Hard limits: max pages, max depth, max runtime (configurable)
+
+UX
+
+ Input schema with grouped fields, defaults, examples
+
+ “Minimal run” possible with only startUrls
+
+ Validation & actionable errors
+
+ Output schema stable + documented
+
+ README includes quickstart + troubleshooting + cost tips
+
+Maintainability
+
+ Modular code (crawlers/extractors/utils)
+
+ Tests: URL normalization, extraction, error classification
+
+ Versioned changelog
+
+ Logging is structured and not noisy
+
+9) What to tell Claude Code to do with this guide
+
+Use this guide as acceptance criteria.
+Claude Code should implement an actor and continuously check:
+
+“Does this actor have HTTP-first + browser fallback?”
+
+“Can a beginner run it in 3 minutes?”
+
+“Does it survive blocks without burning compute?”
+
+“Is the output stable and integration-ready?”
+
+“Does the summary tell the user exactly what to change?”
+
+If any answer is “no”, the actor is not yet “top-tier”.
