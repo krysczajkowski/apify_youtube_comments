@@ -56,6 +56,20 @@ const YOUTUBE_VIDEO_URL = 'https://www.youtube.com/watch';
 const LARGE_VOLUME_THRESHOLD = 100000;
 
 /**
+ * Timeout constants for fast response time (T015-T017)
+ * Per spec: First batch within 30s, total extraction max 5 minutes
+ */
+const REQUEST_TIMEOUT_MS = 10000; // 10 seconds per request
+const TOTAL_EXTRACTION_TIMEOUT_MS = 300000; // 5 minutes total extraction
+const FIRST_BATCH_DEADLINE_MS = 30000; // 30 seconds for first batch
+
+/**
+ * Empty response threshold for early termination (T021)
+ * Per research.md: abort after 3 consecutive empty pages
+ */
+const MAX_CONSECUTIVE_EMPTY_PAGES = 3;
+
+/**
  * Options for comment extraction
  */
 export interface ExtractCommentsOptions {
@@ -136,6 +150,9 @@ async function fetchVideoPage(
         url,
         proxyUrl,
         responseType: 'text',
+        timeout: {
+            request: REQUEST_TIMEOUT_MS,
+        },
         headers: {
             'Accept-Language': 'en-US,en;q=0.9',
             Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
@@ -176,6 +193,9 @@ async function fetchComments(
             continuation: continuationToken,
         },
         responseType: 'json',
+        timeout: {
+            request: REQUEST_TIMEOUT_MS,
+        },
         headers: {
             'Content-Type': 'application/json',
             Origin: 'https://www.youtube.com',
@@ -321,13 +341,32 @@ export async function extractComments(options: ExtractCommentsOptions): Promise<
         };
     }
 
-    // Apply sort order to token (T019)
+    // Apply sort order to token
     continuationToken = getSortedContinuationToken(continuationToken, sortBy);
 
-    // Step 2: Paginate through comments (T017)
+    // Step 2: Paginate through comments with timeout enforcement (T019-T022)
     const replyContinuationTokens = new Map<string, string>();
+    const extractionStartTime = Date.now(); // T019: Track extraction start
+    let consecutiveEmptyPages = 0; // T021: Track empty responses
+    let timedOut = false; // T022: Track timeout status
+    let firstBatchReceived = false; // Track first batch for deadline
 
     while (continuationToken && comments.length < effectiveMaxComments) {
+        // T020: Check total timeout at start of each iteration
+        const elapsedMs = Date.now() - extractionStartTime;
+        if (elapsedMs >= TOTAL_EXTRACTION_TIMEOUT_MS) {
+            logWarning(`Total extraction timeout (${TOTAL_EXTRACTION_TIMEOUT_MS}ms) reached after ${comments.length} comments`, { videoId });
+            timedOut = true;
+            break;
+        }
+
+        // Check first batch deadline (only before first comments arrive)
+        if (!firstBatchReceived && elapsedMs >= FIRST_BATCH_DEADLINE_MS) {
+            logWarning(`First batch deadline (${FIRST_BATCH_DEADLINE_MS}ms) exceeded`, { videoId });
+            timedOut = true;
+            break;
+        }
+
         try {
             const result = await withRetry(() => fetchComments(continuationToken!, proxyConfiguration));
 
@@ -338,6 +377,19 @@ export async function extractComments(options: ExtractCommentsOptions): Promise<
             }
 
             const parsed = parseCommentsFromResponse(result.data, metadata);
+            const newCommentsCount = parsed.comments.length;
+
+            // T021: Track consecutive empty pages
+            if (newCommentsCount === 0) {
+                consecutiveEmptyPages++;
+                if (consecutiveEmptyPages >= MAX_CONSECUTIVE_EMPTY_PAGES) {
+                    logWarning(`${MAX_CONSECUTIVE_EMPTY_PAGES} consecutive empty pages - aborting pagination`, { videoId });
+                    break;
+                }
+            } else {
+                consecutiveEmptyPages = 0; // Reset counter on successful page
+                firstBatchReceived = true; // Mark first batch received
+            }
 
             // Add valid comments
             for (const comment of parsed.comments) {
@@ -370,10 +422,18 @@ export async function extractComments(options: ExtractCommentsOptions): Promise<
         }
     }
 
-    // Step 3: Extract replies (T018)
-    if (includeReplies && comments.length < effectiveMaxComments) {
+    // Step 3: Extract replies with timeout enforcement
+    if (includeReplies && comments.length < effectiveMaxComments && !timedOut) {
         for (const [parentCid, replyToken] of replyContinuationTokens) {
             if (comments.length >= effectiveMaxComments) break;
+
+            // Check timeout before processing each parent's replies
+            const elapsedMs = Date.now() - extractionStartTime;
+            if (elapsedMs >= TOTAL_EXTRACTION_TIMEOUT_MS) {
+                logWarning(`Total extraction timeout reached during reply extraction`, { videoId });
+                timedOut = true;
+                break;
+            }
 
             const parentComment = comments.find((c) => c.cid === parentCid);
             if (!parentComment || parentComment.replyCount === 0) continue;
@@ -381,6 +441,14 @@ export async function extractComments(options: ExtractCommentsOptions): Promise<
             let currentReplyToken: string | null = replyToken;
 
             while (currentReplyToken && comments.length < effectiveMaxComments) {
+                // Check timeout at each reply page
+                const replyElapsedMs = Date.now() - extractionStartTime;
+                if (replyElapsedMs >= TOTAL_EXTRACTION_TIMEOUT_MS) {
+                    logWarning(`Total extraction timeout reached during reply pagination`, { videoId });
+                    timedOut = true;
+                    break;
+                }
+
                 try {
                     const result = await withRetry(() => fetchComments(currentReplyToken!, proxyConfiguration));
 
@@ -404,10 +472,18 @@ export async function extractComments(options: ExtractCommentsOptions): Promise<
                     break;
                 }
             }
+
+            if (timedOut) break;
         }
     }
 
-    const completed = !continuationToken || comments.length >= effectiveMaxComments;
+    // T022: Return partial results - completed is false if timed out or more pages exist
+    const completed = !timedOut && (!continuationToken || comments.length >= effectiveMaxComments);
+
+    // Log if returning partial results due to timeout
+    if (timedOut && comments.length > 0) {
+        logWarning(`Returning ${comments.length} partial results due to timeout`, { videoId });
+    }
 
     return {
         comments,

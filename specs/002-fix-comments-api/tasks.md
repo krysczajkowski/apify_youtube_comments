@@ -68,14 +68,14 @@
 
 ### Implementation for User Story 2
 
-- [ ] T015 [US2] Add per-request timeout constant (10 seconds) in src/crawler.ts
-- [ ] T016 [US2] Add total extraction timeout constant (5 minutes / 300000ms) in src/crawler.ts
-- [ ] T017 [US2] Add first batch deadline constant (30 seconds) in src/crawler.ts
-- [ ] T018 [US2] Implement request timeout option in got-scraping calls in src/crawler.ts
-- [ ] T019 [US2] Add extraction start timestamp tracking in pagination loop in src/crawler.ts
-- [ ] T020 [US2] Add total timeout check at start of each pagination iteration in src/crawler.ts
-- [ ] T021 [US2] Add empty response counter and abort after 3 consecutive empty pages in src/crawler.ts
-- [ ] T022 [US2] Return partial results when timeout occurs instead of throwing error in src/crawler.ts
+- [X] T015 [US2] Add per-request timeout constant (10 seconds) in src/crawler.ts
+- [X] T016 [US2] Add total extraction timeout constant (5 minutes / 300000ms) in src/crawler.ts
+- [X] T017 [US2] Add first batch deadline constant (30 seconds) in src/crawler.ts
+- [X] T018 [US2] Implement request timeout option in got-scraping calls in src/crawler.ts
+- [X] T019 [US2] Add extraction start timestamp tracking in pagination loop in src/crawler.ts
+- [X] T020 [US2] Add total timeout check at start of each pagination iteration in src/crawler.ts
+- [X] T021 [US2] Add empty response counter and abort after 3 consecutive empty pages in src/crawler.ts
+- [X] T022 [US2] Return partial results when timeout occurs instead of throwing error in src/crawler.ts
 
 **Checkpoint**: Extraction now respects timeouts and returns results quickly
 
