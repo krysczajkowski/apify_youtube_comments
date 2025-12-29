@@ -145,11 +145,11 @@
 
 **Purpose**: Final validation and verification across all user stories
 
-- [ ] T033 Run `npm test` and verify 100% pass rate
-- [ ] T034 Run `npm run lint` and fix any linting issues
-- [ ] T035 Run `npm run typecheck` and fix any type errors
-- [ ] T036 Validate examples/*.json files work when run on Apify platform
-- [ ] T037 Run quickstart.md verification checklist to confirm all items pass
+- [x] T033 Run `npm test` and verify 100% pass rate
+- [x] T034 Run `npm run lint` and fix any linting issues
+- [x] T035 Run `npm run typecheck` and fix any type errors
+- [x] T036 Validate examples/*.json files work when run on Apify platform
+- [x] T037 Run quickstart.md verification checklist to confirm all items pass
 
 ---
 

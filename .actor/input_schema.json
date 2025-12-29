@@ -15,21 +15,7 @@
           "method": "GET"
         }
       ],
-      "editor": "requestListSources",
-      "items": {
-        "type": "object",
-        "properties": {
-          "url": {
-            "type": "string",
-            "format": "uri"
-          },
-          "method": {
-            "type": "string",
-            "default": "GET"
-          }
-        },
-        "required": ["url"]
-      }
+      "editor": "requestListSources"
     },
     "maxComments": {
       "title": "Maximum comments",
