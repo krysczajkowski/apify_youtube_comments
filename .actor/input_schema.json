@@ -8,19 +8,22 @@
     "startUrls": {
       "title": "Direct video URLs",
       "type": "array",
-      "description": "Enter YouTube video URLs, one per line.",
-      "prefill": [],
-      "editor": "stringList",
-      "items": {
-        "type": "string"
-      }
+      "description": "Enter a link to a specific YouTube video. You can also import a CSV file or Google Sheet with a list of URLs.",
+      "prefill": [
+        {
+          "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+          "method": "GET"
+        }
+      ],
+      "editor": "requestListSources"
     },
     "maxComments": {
       "title": "Maximum comments",
       "type": "integer",
-      "description": "Limit the number of comments you want to scrape per video. Set to 0 or leave empty for unlimited extraction (warning will be logged for videos with 100k+ comments).",
+      "description": "Limit the number of comments you want to scrape per video. Set to 0 for unlimited extraction (max 100,000 per video to prevent runaway costs).",
       "default": 0,
       "minimum": 0,
+      "maximum": 100000,
       "editor": "number"
     },
     "commentsSortBy": {

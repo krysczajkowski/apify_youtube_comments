@@ -1,0 +1,98 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Input Schema Updates for 003-actor-improvement",
+  "description": "Specifies required updates to input_schema.json per FR-023 and FR-024",
+  "type": "object",
+  "updates": {
+    "startUrls": {
+      "change": "Add prefill array",
+      "before": {
+        "prefill": []
+      },
+      "after": {
+        "prefill": [
+          {
+            "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+            "method": "GET"
+          }
+        ]
+      },
+      "rationale": "FR-023: Enable first-time users to click Start immediately with working example"
+    },
+    "maxComments": {
+      "change": "Add maximum constraint",
+      "before": {
+        "minimum": 0
+      },
+      "after": {
+        "minimum": 0,
+        "maximum": 100000
+      },
+      "rationale": "FR-024: Prevent runaway costs from unlimited extraction; 100k is practical upper limit"
+    }
+  },
+  "fullSchemaAfterUpdates": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "YouTube Comments Scraper Input",
+    "description": "Input schema for the YouTube Comments Scraper Actor",
+    "type": "object",
+    "schemaVersion": 1,
+    "properties": {
+      "startUrls": {
+        "title": "Direct video URLs",
+        "type": "array",
+        "description": "Enter a link to a specific YouTube video. You can also import a CSV file or Google Sheet with a list of URLs.",
+        "prefill": [
+          {
+            "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+            "method": "GET"
+          }
+        ],
+        "editor": "requestListSources",
+        "items": {
+          "type": "object",
+          "properties": {
+            "url": {
+              "type": "string",
+              "format": "uri"
+            },
+            "method": {
+              "type": "string",
+              "default": "GET"
+            }
+          },
+          "required": ["url"]
+        }
+      },
+      "maxComments": {
+        "title": "Maximum comments",
+        "type": "integer",
+        "description": "Limit the number of comments you want to scrape per video. Set to 0 for unlimited extraction (max 100,000 per video to prevent runaway costs).",
+        "default": 0,
+        "minimum": 0,
+        "maximum": 100000,
+        "editor": "number"
+      },
+      "commentsSortBy": {
+        "title": "Sorting order",
+        "type": "string",
+        "description": "Select YouTube sorting parameter for comments",
+        "default": "1",
+        "enum": ["0", "1"],
+        "enumTitles": ["Top comments (by engagement)", "Newest first (chronological)"],
+        "editor": "select"
+      },
+      "proxyConfiguration": {
+        "title": "Proxy configuration",
+        "type": "object",
+        "description": "Select proxies to use for scraping. Residential proxies are required for reliable YouTube scraping.",
+        "default": {
+          "useApifyProxy": true,
+          "apifyProxyGroups": ["RESIDENTIAL"]
+        },
+        "editor": "proxy"
+      }
+    },
+    "required": ["startUrls"]
+  }
+}

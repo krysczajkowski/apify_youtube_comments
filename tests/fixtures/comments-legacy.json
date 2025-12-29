@@ -1,0 +1,220 @@
+{
+  "onResponseReceivedEndpoints": [
+    {
+      "reloadContinuationItemsCommand": {
+        "slot": "RELOAD_CONTINUATION_SLOT_BODY",
+        "continuationItems": [
+          {
+            "commentThreadRenderer": {
+              "comment": {
+                "commentRenderer": {
+                  "commentId": "UgzTest1CommentId123",
+                  "contentText": {
+                    "runs": [
+                      {
+                        "text": "This song is a classic! Never gets old."
+                      }
+                    ]
+                  },
+                  "authorText": {
+                    "simpleText": "@user_one"
+                  },
+                  "voteCount": {
+                    "simpleText": "1.2K"
+                  },
+                  "replyCount": 45,
+                  "authorIsChannelOwner": false,
+                  "publishedTimeText": {
+                    "runs": [
+                      {
+                        "text": "3 years ago"
+                      }
+                    ]
+                  },
+                  "actionButtons": {
+                    "commentActionButtonsRenderer": {
+                      "likeButton": {},
+                      "replyButton": {}
+                    }
+                  }
+                }
+              },
+              "replies": {
+                "commentRepliesRenderer": {
+                  "contents": [
+                    {
+                      "continuationItemRenderer": {
+                        "continuationEndpoint": {
+                          "continuationCommand": {
+                            "token": "EhYSC2RRdzR3OVdnWGNRIghVZ3pUZXN0MUNvbW1lbnRJZDEyMyoCCAA%3D"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "commentThreadRenderer": {
+              "comment": {
+                "commentRenderer": {
+                  "commentId": "UgzTest2CommentId456",
+                  "contentText": {
+                    "simpleText": "I got rickrolled again! 😂"
+                  },
+                  "authorText": {
+                    "simpleText": "@user_two"
+                  },
+                  "voteCount": {
+                    "simpleText": "234"
+                  },
+                  "replyCount": 5,
+                  "authorIsChannelOwner": false,
+                  "publishedTimeText": {
+                    "simpleText": "2 months ago"
+                  },
+                  "actionButtons": {
+                    "commentActionButtonsRenderer": {
+                      "likeButton": {},
+                      "replyButton": {},
+                      "creatorHeart": {
+                        "creatorHeartRenderer": {
+                          "creatorThumbnail": {}
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "replies": {
+                "commentRepliesRenderer": {
+                  "contents": [
+                    {
+                      "continuationItemRenderer": {
+                        "continuationEndpoint": {
+                          "continuationCommand": {
+                            "token": "EhYSC2RRdzR3OVdnWGNRIghVZ3pUZXN0MkNvbW1lbnRJZDQ1NioCCAA%3D"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "commentThreadRenderer": {
+              "comment": {
+                "commentRenderer": {
+                  "commentId": "UgzTest3OwnerComment789",
+                  "contentText": {
+                    "runs": [
+                      {
+                        "text": "Thank you all for the love! This song means so much to me."
+                      }
+                    ]
+                  },
+                  "authorText": {
+                    "simpleText": "Rick Astley"
+                  },
+                  "voteCount": {
+                    "simpleText": "45K"
+                  },
+                  "replyCount": 1234,
+                  "authorIsChannelOwner": true,
+                  "publishedTimeText": {
+                    "runs": [
+                      {
+                        "text": "1 year ago"
+                      }
+                    ]
+                  },
+                  "actionButtons": {
+                    "commentActionButtonsRenderer": {
+                      "likeButton": {},
+                      "replyButton": {}
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "commentThreadRenderer": {
+              "comment": {
+                "commentRenderer": {
+                  "commentId": "UgzTest4NoReplies000",
+                  "contentText": {
+                    "runs": [
+                      {
+                        "text": "First comment with no replies"
+                      }
+                    ]
+                  },
+                  "authorText": {
+                    "simpleText": "@lonely_commenter"
+                  },
+                  "voteCount": {
+                    "simpleText": "0"
+                  },
+                  "replyCount": 0,
+                  "authorIsChannelOwner": false,
+                  "publishedTimeText": {
+                    "runs": [
+                      {
+                        "text": "1 day ago"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          {
+            "commentThreadRenderer": {
+              "comment": {
+                "commentRenderer": {
+                  "commentId": "UgzTest5MillionLikes",
+                  "contentText": {
+                    "runs": [
+                      {
+                        "text": "Who else is watching in 2024?"
+                      }
+                    ]
+                  },
+                  "authorText": {
+                    "simpleText": "@popular_user"
+                  },
+                  "voteCount": {
+                    "simpleText": "2.5M"
+                  },
+                  "replyCount": 8765,
+                  "authorIsChannelOwner": false,
+                  "publishedTimeText": {
+                    "runs": [
+                      {
+                        "text": "6 months ago"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          {
+            "continuationItemRenderer": {
+              "continuationEndpoint": {
+                "continuationCommand": {
+                  "token": "Eg0SC2RRdzR3OVdnWGNRGAYyJSIRIgtkUXc0dzlXZ1hjUTAAeAJCEGNvbW1lbnRzLXNlY3Rpb24oAjgBeAI%3D"
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

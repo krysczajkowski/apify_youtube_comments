@@ -1,0 +1,12 @@
+{
+  "startUrls": [
+    { "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ" },
+    { "url": "https://youtu.be/9bZkp7q19f0" }
+  ],
+  "maxComments": 500,
+  "commentsSortBy": "0",
+  "proxyConfiguration": {
+    "useApifyProxy": true,
+    "apifyProxyGroups": ["RESIDENTIAL"]
+  }
+}

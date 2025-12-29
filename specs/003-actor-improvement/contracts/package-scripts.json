@@ -1,0 +1,36 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Package.json Script Updates",
+  "description": "Required script changes per FR-025, FR-026, FR-027",
+  "type": "object",
+  "scriptsToAdd": {
+    "test": {
+      "value": "vitest run",
+      "requirement": "FR-025",
+      "description": "Run unit and integration tests with recorded responses"
+    },
+    "typecheck": {
+      "value": "tsc --noEmit",
+      "requirement": "FR-026",
+      "description": "Type checking without emitting files"
+    },
+    "test:e2e": {
+      "value": "LIVE_TEST=true vitest run tests/e2e --passWithNoTests",
+      "requirement": "FR-027",
+      "description": "Optional live API verification (not run in CI)"
+    }
+  },
+  "devDependenciesToAdd": {
+    "vitest": "^2.0.0",
+    "@vitest/coverage-v8": "^2.0.0"
+  },
+  "expectedScriptsSection": {
+    "start": "npm run build && node dist/main.js",
+    "start:prod": "node dist/main.js",
+    "build": "tsc",
+    "lint": "eslint src --ext .ts",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "test:e2e": "LIVE_TEST=true vitest run tests/e2e --passWithNoTests"
+  }
+}
