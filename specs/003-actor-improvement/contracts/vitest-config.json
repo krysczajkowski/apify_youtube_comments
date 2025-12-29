@@ -1,0 +1,54 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Vitest Configuration Contract",
+  "description": "Expected vitest.config.ts configuration for this feature",
+  "type": "object",
+  "properties": {
+    "test": {
+      "type": "object",
+      "properties": {
+        "globals": {
+          "type": "boolean",
+          "const": false,
+          "description": "Use explicit imports for clarity per research.md"
+        },
+        "environment": {
+          "type": "string",
+          "const": "node",
+          "description": "Server-side actor, no DOM needed"
+        },
+        "include": {
+          "type": "array",
+          "items": { "type": "string" },
+          "default": ["tests/**/*.test.ts"],
+          "description": "Test file glob pattern"
+        },
+        "coverage": {
+          "type": "object",
+          "properties": {
+            "provider": {
+              "type": "string",
+              "const": "v8"
+            },
+            "reporter": {
+              "type": "array",
+              "items": { "type": "string" },
+              "default": ["text", "json", "html"]
+            },
+            "include": {
+              "type": "array",
+              "items": { "type": "string" },
+              "default": ["src/**/*.ts"]
+            },
+            "exclude": {
+              "type": "array",
+              "items": { "type": "string" },
+              "default": ["src/main.ts"]
+            }
+          }
+        }
+      }
+    }
+  },
+  "expectedConfig": "/// <reference types=\"vitest/config\" />\nimport { defineConfig } from 'vitest/config';\n\nexport default defineConfig({\n  test: {\n    globals: false,\n    environment: 'node',\n    include: ['tests/**/*.test.ts'],\n    coverage: {\n      provider: 'v8',\n      reporter: ['text', 'json', 'html'],\n      include: ['src/**/*.ts'],\n      exclude: ['src/main.ts']\n    }\n  }\n});"
+}

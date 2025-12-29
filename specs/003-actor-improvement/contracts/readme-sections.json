@@ -1,0 +1,83 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "README Enhancement Sections",
+  "description": "Required new/updated sections per FR-016 through FR-022",
+  "type": "object",
+  "sections": {
+    "legalDisclaimer": {
+      "requirement": "FR-016",
+      "heading": "Legal Disclaimer",
+      "location": "After Features section",
+      "requiredContent": [
+        "User responsibility for compliance with YouTube ToS",
+        "Data protection considerations",
+        "Not for use in violations of applicable laws"
+      ],
+      "template": "## Legal Disclaimer\n\nThis actor is provided for educational and legitimate business purposes only. Users are solely responsible for:\n\n- Complying with YouTube's Terms of Service\n- Ensuring their use case complies with applicable data protection laws (GDPR, CCPA, etc.)\n- Obtaining necessary consents for processing personal data\n- Not using extracted data for harassment, spam, or illegal purposes\n\nThe actor only extracts publicly available comment data. However, comments may contain personal information. Handle extracted data responsibly."
+    },
+    "supportIssues": {
+      "requirement": "FR-017",
+      "heading": "Support & Issues",
+      "location": "After Limitations section",
+      "requiredContent": [
+        "GitHub Issues link",
+        "Bug report guidance",
+        "Feature request process"
+      ],
+      "template": "## Support & Issues\n\nIf you encounter any problems or have suggestions:\n\n- **Bug Reports**: [Create an issue](https://github.com/YOUR_USERNAME/youtube-comments-scraper/issues) with steps to reproduce\n- **Feature Requests**: Open an issue describing the desired functionality\n- **Questions**: Check existing issues or create a new one\n\nPlease include the video URL (if applicable) and any error messages when reporting bugs."
+    },
+    "costEstimation": {
+      "requirement": "FR-018",
+      "heading": "Cost Estimation",
+      "location": "New section after Usage",
+      "requiredContent": [
+        "Example scenarios table",
+        "Compute unit estimates",
+        "Factors affecting cost"
+      ],
+      "template": "## Cost Estimation\n\nRunning this actor consumes Apify platform compute units (CUs). Here are some example scenarios:\n\n| Scenario | Videos | Comments/Video | Est. Time | Est. CUs |\n|----------|--------|----------------|-----------|----------|\n| Quick test | 1 | 100 | ~30s | ~0.1 |\n| Medium batch | 10 | 500 | ~5min | ~1-2 |\n| Large extraction | 50 | 1000 | ~30min | ~5-10 |\n\n**Cost factors:**\n- HTTP-first approach uses minimal resources\n- Residential proxies required (included in Starter plan)\n- Memory usage scales with comment count per request"
+    },
+    "concurrency": {
+      "requirement": "FR-019",
+      "heading": "Concurrency & Processing",
+      "location": "Technical Details section",
+      "requiredContent": [
+        "Sequential processing explanation",
+        "Why concurrent requests are avoided"
+      ],
+      "template": "### Concurrency\n\nThis actor processes videos sequentially (one at a time) to:\n\n- Minimize detection risk from YouTube\n- Maintain reliable session handling\n- Reduce proxy rotation complexity\n\nFor large batches, consider splitting URLs across multiple runs."
+    },
+    "loginLimitations": {
+      "requirement": "FR-020",
+      "heading": "Login & Authentication",
+      "location": "Limitations section",
+      "requiredContent": [
+        "Authenticated comments not supported",
+        "Member-only content limitations"
+      ],
+      "template": "### Login Limitations\n\nThis actor operates without authentication, which means:\n\n- Only publicly visible comments are extracted\n- Member-only or subscriber-only comments are not accessible\n- Age-restricted video comments require manual verification"
+    },
+    "integrations": {
+      "requirement": "FR-021",
+      "heading": "Integrations",
+      "location": "New section after Output",
+      "requiredContent": [
+        "Make (Integromat) guidance",
+        "Zapier integration",
+        "Google Sheets export"
+      ],
+      "template": "## Integrations\n\nThis actor integrates with popular automation platforms:\n\n### Make (Integromat)\nUse the Apify module to trigger runs and process results.\n\n### Zapier\nConnect via the Apify app to automate workflows.\n\n### Google Sheets\nExport results directly to Google Sheets using Apify's built-in integration.\n\n### Webhooks\nReceive notifications when runs complete via webhook triggers."
+    },
+    "competitorComparison": {
+      "requirement": "FR-022",
+      "heading": "Why Choose This Actor?",
+      "location": "Features/Introduction section",
+      "requiredContent": [
+        "HTTP-first advantage",
+        "Cost comparison",
+        "Speed benefits"
+      ],
+      "template": "## Why Choose This Actor?\n\n### HTTP-First Approach\nUnlike browser-based scrapers, this actor uses direct HTTP requests:\n\n- **10-100x faster** than browser automation\n- **Significantly lower cost** per comment extracted\n- **More reliable** with fewer failures from page rendering issues\n\n### Comparison\n| Feature | This Actor | Browser-based |\n|---------|------------|---------------|\n| Speed | ~100 comments/sec | ~5-10 comments/sec |\n| Cost (CU/1000 comments) | ~0.05 | ~1-5 |\n| Reliability | 95%+ | 70-85% |"
+    }
+  }
+}
