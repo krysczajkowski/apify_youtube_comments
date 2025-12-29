@@ -50,9 +50,9 @@
 
 ### Implementation for User Story 1
 
-- [ ] T010 [US1] Update input_schema.json to add prefill array with Rick Astley video URL to startUrls field
-- [ ] T011 [US1] Update input_schema.json to add maximum constraint (100000) to maxComments field
-- [ ] T012 [US1] Create examples/minimal.json with single YouTube URL using defaults
+- [x] T010 [US1] Update input_schema.json to add prefill array with Rick Astley video URL to startUrls field
+- [x] T011 [US1] Update input_schema.json to add maximum constraint (100000) to maxComments field
+- [x] T012 [US1] Create examples/minimal.json with single YouTube URL using defaults
 
 **Checkpoint**: User Story 1 complete - first-time users can now run actor with one click
 
