@@ -1,0 +1,10 @@
+{
+  "startUrls": [
+    { "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ" },
+    { "url": "https://www.youtube.com/watch?v=9bZkp7q19f0" },
+    { "url": "https://www.youtube.com/watch?v=fJ9rUzIMcZQ" },
+    { "url": "https://www.youtube.com/watch?v=kJQP7kiw5Fk" },
+    { "url": "https://www.youtube.com/watch?v=JGwWNGJdvx8" }
+  ],
+  "maxComments": 100
+}

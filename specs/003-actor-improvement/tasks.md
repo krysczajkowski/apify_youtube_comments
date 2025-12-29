@@ -68,25 +68,25 @@
 
 > **NOTE**: Tests validate existing code modules with fixtures from Phase 2
 
-- [ ] T013 [P] [US2] Create tests/unit/url.test.ts covering extractVideoId, validateYouTubeUrl, isValidYouTubeUrl
-- [ ] T014 [P] [US2] Create tests/unit/retry.test.ts covering classifyError, shouldRetry, calculateBackoffDelay
-- [ ] T015 [P] [US2] Create tests/unit/comments.test.ts covering extractComment, parseCommentsFromResponse, parseVoteCount
-- [ ] T016 [P] [US2] Create tests/unit/metadata.test.ts covering extractYtInitialData, extractVideoTitle, extractCommentsContinuationToken
+- [x] T013 [P] [US2] Create tests/unit/url.test.ts covering extractVideoId, validateYouTubeUrl, isValidYouTubeUrl
+- [x] T014 [P] [US2] Create tests/unit/retry.test.ts covering classifyError, shouldRetry, calculateBackoffDelay
+- [x] T015 [P] [US2] Create tests/unit/comments.test.ts covering extractComment, parseCommentsFromResponse, parseVoteCount
+- [x] T016 [P] [US2] Create tests/unit/metadata.test.ts covering extractYtInitialData, extractVideoTitle, extractCommentsContinuationToken
 
 ### Integration Test for User Story 2
 
-- [ ] T017 [US2] Create tests/integration/actor.test.ts verifying actor runs successfully with recorded responses
+- [x] T017 [US2] Create tests/integration/actor.test.ts verifying actor runs successfully with recorded responses
 
 ### Documentation Files for User Story 2
 
-- [ ] T018 [P] [US2] Create CHANGELOG.md with version 1.0.0 entry documenting initial release features
-- [ ] T019 [P] [US2] Create LICENSE file with MIT License text
-- [ ] T020 [P] [US2] Create CONTRIBUTING.md with bug reports, development setup, and PR guidelines
+- [x] T018 [P] [US2] Create CHANGELOG.md with version 1.0.0 entry documenting initial release features
+- [x] T019 [P] [US2] Create LICENSE file with MIT License text
+- [x] T020 [P] [US2] Create CONTRIBUTING.md with bug reports, development setup, and PR guidelines
 
 ### Example Configuration Files for User Story 2
 
-- [ ] T021 [P] [US2] Create examples/advanced.json with proxies, limits, and sort options
-- [ ] T022 [P] [US2] Create examples/multiple-videos.json with 5 video URLs for batch processing
+- [x] T021 [P] [US2] Create examples/advanced.json with proxies, limits, and sort options
+- [x] T022 [P] [US2] Create examples/multiple-videos.json with 5 video URLs for batch processing
 
 **Checkpoint**: User Story 2 complete - `npm test` passes, all standard open-source files present
 
