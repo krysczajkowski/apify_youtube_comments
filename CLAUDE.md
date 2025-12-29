@@ -26,10 +26,10 @@ npm test && npm run lint
 TypeScript 5.x / Node.js 18+: Follow standard conventions
 
 ## Recent Changes
+- 004-performance-readme-update: Added TypeScript 5.x / Node.js 18+ + Apify SDK 3.x, Crawlee 3.x, got-scraping 4.x
 - 003-actor-improvement: Added TypeScript 5.x / Node.js 18+ + Apify SDK 3.x, Crawlee 3.x, got-scraping 4.x, Vitest (new)
 - 002-fix-comments-api: Added TypeScript 5.x / Node.js 18+ + Apify SDK 3.x, Crawlee 3.x, got-scraping 4.x
 
-- 001-youtube-comments-actor: Added TypeScript 5.x / Node.js 18+ + Apify SDK 3.x, Crawlee 3.x (HTTP/Cheerio crawler with browser fallback)
 
 <!-- MANUAL ADDITIONS START -->
 <!-- MANUAL ADDITIONS END -->

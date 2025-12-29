@@ -1,6 +1,6 @@
 /**
  * Exponential backoff retry logic with jitter
- * Per research.md: base 1000ms, max 30000ms, 3 retries, 50% jitter
+ * Per spec 004: base 200ms, max 1000ms, 1 retry, 50% jitter
  */
 
 import type { ErrorCategory } from '../types/run-summary.js';
@@ -9,11 +9,11 @@ import type { ErrorCategory } from '../types/run-summary.js';
  * Retry configuration options
  */
 export interface RetryOptions {
-    /** Base delay in milliseconds (default: 1000) */
+    /** Base delay in milliseconds (default: 200) */
     baseDelayMs?: number;
-    /** Maximum delay in milliseconds (default: 30000) */
+    /** Maximum delay in milliseconds (default: 1000) */
     maxDelayMs?: number;
-    /** Maximum number of retries (default: 3) */
+    /** Maximum number of retries (default: 1) */
     maxRetries?: number;
     /** Jitter factor 0-1 (default: 0.5 for 50% variance) */
     jitterFactor?: number;
@@ -23,9 +23,9 @@ export interface RetryOptions {
  * Default retry configuration per research.md
  */
 export const DEFAULT_RETRY_OPTIONS: Required<RetryOptions> = {
-    baseDelayMs: 1000,
-    maxDelayMs: 30000,
-    maxRetries: 3,
+    baseDelayMs: 200,
+    maxDelayMs: 1000,
+    maxRetries: 1,
     jitterFactor: 0.5,
 };
 
