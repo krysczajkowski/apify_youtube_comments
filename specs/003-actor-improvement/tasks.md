@@ -119,8 +119,8 @@
 
 ### Implementation for User Story 4
 
-- [ ] T029 [US4] Verify and document maxComments constraint in input_schema.json (min: 0, max: 100000)
-- [ ] T030 [US4] Add input validation test cases verifying schema constraints work correctly
+- [x] T029 [US4] Verify and document maxComments constraint in input_schema.json (min: 0, max: 100000)
+- [x] T030 [US4] Add input validation test cases verifying schema constraints work correctly
 
 **Checkpoint**: User Story 4 complete - input validation prevents user errors
 
@@ -134,8 +134,8 @@
 
 ### Implementation for User Story 5
 
-- [ ] T031 [US5] Add Competitor Comparison / Why This Actor section to README.md highlighting HTTP-first advantage
-- [ ] T032 [US5] Update Features section in README.md to emphasize cost/speed benefits of HTTP approach
+- [x] T031 [US5] Add Competitor Comparison / Why This Actor section to README.md highlighting HTTP-first advantage
+- [x] T032 [US5] Update Features section in README.md to emphasize cost/speed benefits of HTTP approach
 
 **Checkpoint**: User Story 5 complete - marketplace positioning is clear
 
