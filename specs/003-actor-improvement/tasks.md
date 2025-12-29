@@ -100,12 +100,12 @@
 
 ### Implementation for User Story 3
 
-- [ ] T023 [US3] Add Legal Disclaimer section to README.md explaining user responsibility for compliance
-- [ ] T024 [US3] Add Support/Issues section to README.md with GitHub issues link
-- [ ] T025 [US3] Add Cost Estimation table to README.md with example scenarios (quick test, medium batch, large extraction)
-- [ ] T026 [US3] Add Concurrency documentation to README.md explaining sequential processing approach
-- [ ] T027 [US3] Add Login Limitations section to README.md noting authenticated comments not supported
-- [ ] T028 [US3] Add Integrations section to README.md with Make, Zapier, Sheets workflow guidance
+- [x] T023 [US3] Add Legal Disclaimer section to README.md explaining user responsibility for compliance
+- [x] T024 [US3] Add Support/Issues section to README.md with GitHub issues link
+- [x] T025 [US3] Add Cost Estimation table to README.md with example scenarios (quick test, medium batch, large extraction)
+- [x] T026 [US3] Add Concurrency documentation to README.md explaining sequential processing approach
+- [x] T027 [US3] Add Login Limitations section to README.md noting authenticated comments not supported
+- [x] T028 [US3] Add Integrations section to README.md with Make, Zapier, Sheets workflow guidance
 
 **Checkpoint**: User Story 3 complete - README has comprehensive documentation for enterprise evaluation
 
