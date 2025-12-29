@@ -11,16 +11,9 @@ Unlike browser-based scrapers, this actor uses direct HTTP requests:
 - **Significantly lower cost** per comment extracted
 - **More reliable** with fewer failures from page rendering issues
 
-### Why Not Use Browser-Based Scrapers?
+### Why Not Browser-Based Scrapers?
 
-Browser-based YouTube scrapers have significant drawbacks:
-
-- **High Cost**: Browser automation consumes 20-100x more compute units
-- **Slow Performance**: Page rendering and JavaScript execution add latency
-- **Unreliable**: Browser crashes, memory leaks, and rendering failures cause data loss
-- **Hard to Scale**: Concurrent browser instances require significant resources
-
-This actor eliminates these problems by using direct HTTP requests to YouTube's internal API.
+Browser automation consumes 20-100x more compute units, adds rendering latency, and fails frequently due to crashes and memory leaks. This actor uses direct HTTP requests instead.
 
 ### Performance Comparison
 
@@ -230,13 +223,7 @@ For reliable extraction, residential proxies are recommended:
 
 ### Concurrency
 
-This actor processes videos sequentially (one at a time) to:
-
-- Minimize detection risk from YouTube
-- Maintain reliable session handling
-- Reduce proxy rotation complexity
-
-For large batches, consider splitting URLs across multiple runs.
+Videos are processed sequentially to minimize detection risk and maintain reliable sessions. For large batches, split URLs across multiple runs.
 
 ## Performance Tips
 
