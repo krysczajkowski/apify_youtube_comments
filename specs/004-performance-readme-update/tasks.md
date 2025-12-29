@@ -69,9 +69,9 @@
 
 ### Implementation for User Story 3
 
-- [ ] T005 [P] [US3] Tighten "Why Not Use Browser-Based Scrapers?" section in README.md (lines 14-22) for conciseness
-- [ ] T006 [P] [US3] Review and tighten Proxy Configuration section in README.md for minor wordiness
-- [ ] T007 [US3] Final pass: verify README retains all sections and essential information per FR-006, FR-008
+- [x] T005 [P] [US3] Tighten "Why Not Use Browser-Based Scrapers?" section in README.md (lines 14-22) for conciseness
+- [x] T006 [P] [US3] Review and tighten Proxy Configuration section in README.md for minor wordiness
+- [x] T007 [US3] Final pass: verify README retains all sections and essential information per FR-006, FR-008
 
 **Checkpoint**: README readability improved. All sections intact.
 
@@ -81,8 +81,8 @@
 
 **Purpose**: Final validation across all changes
 
-- [ ] T008 Run npm run lint and npm run build to verify no regressions in src/utils/retry.ts
-- [ ] T009 Run quickstart.md validation: execute `npx apify run -i '{"startUrls":[{"url":"https://www.youtube.com/watch?v=dQw4w9WgXcQ"}],"maxComments":100}'` and confirm <60s completion
+- [x] T008 Run npm run lint and npm run build to verify no regressions in src/utils/retry.ts
+- [x] T009 Run quickstart.md validation: execute `npx apify run -i '{"startUrls":[{"url":"https://www.youtube.com/watch?v=dQw4w9WgXcQ"}],"maxComments":100}'` and confirm <60s completion
 
 ---
 
