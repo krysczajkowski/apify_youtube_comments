@@ -33,10 +33,10 @@
 
 **⚠️ CRITICAL**: No user story work can begin until test fixtures are ready
 
-- [ ] T006 [P] Create tests/fixtures/ytInitialData.json with sanitized video page metadata
-- [ ] T007 [P] Create tests/fixtures/comments-legacy.json with InnerTube API response sample
-- [ ] T008 [P] Create tests/fixtures/comments-entity.json with frameworkUpdates format response
-- [ ] T009 [P] Create tests/fixtures/video-page.html with minimal HTML containing ytInitialData
+- [x] T006 [P] Create tests/fixtures/ytInitialData.json with sanitized video page metadata
+- [x] T007 [P] Create tests/fixtures/comments-legacy.json with InnerTube API response sample
+- [x] T008 [P] Create tests/fixtures/comments-entity.json with frameworkUpdates format response
+- [x] T009 [P] Create tests/fixtures/video-page.html with minimal HTML containing ytInitialData
 
 **Checkpoint**: Test fixtures ready - user story implementation can now begin
 

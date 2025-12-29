@@ -1,0 +1,181 @@
+{
+  "onResponseReceivedEndpoints": [
+    {
+      "appendContinuationItemsAction": {
+        "continuationItems": [
+          {
+            "commentThreadRenderer": {
+              "comment": {
+                "commentRenderer": {
+                  "commentId": "UgzEntity1CommentABC",
+                  "contentText": {
+                    "runs": [
+                      {
+                        "text": "This is from the legacy format in entity response"
+                      }
+                    ]
+                  },
+                  "authorText": {
+                    "simpleText": "@legacy_user"
+                  },
+                  "voteCount": {
+                    "simpleText": "100"
+                  },
+                  "replyCount": 2,
+                  "authorIsChannelOwner": false,
+                  "publishedTimeText": {
+                    "runs": [
+                      {
+                        "text": "1 week ago"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          {
+            "continuationItemRenderer": {
+              "continuationEndpoint": {
+                "continuationCommand": {
+                  "token": "NextPageTokenForEntityFormat123"
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "frameworkUpdates": {
+    "entityBatchUpdate": {
+      "mutations": [
+        {
+          "payload": {
+            "commentEntityPayload": {
+              "properties": {
+                "commentId": "UgzEntityPayload1XYZ",
+                "content": {
+                  "content": "This comment uses the new entity payload format!"
+                },
+                "publishedTime": "2 weeks ago"
+              },
+              "author": {
+                "displayName": "@entity_format_user",
+                "channelId": "UCxyz123",
+                "isCreator": false
+              },
+              "toolbar": {
+                "likeCountA11y": "500 likes",
+                "replyCount": "10"
+              },
+              "engagement": {
+                "likeCount": 500
+              }
+            }
+          }
+        },
+        {
+          "payload": {
+            "commentEntityPayload": {
+              "properties": {
+                "commentId": "UgzEntityPayload2ABC",
+                "content": {
+                  "content": "Another entity format comment with K suffix likes"
+                },
+                "publishedTime": "3 months ago"
+              },
+              "author": {
+                "displayName": "@power_user_entity",
+                "channelId": "UCabc456",
+                "isCreator": false
+              },
+              "toolbar": {
+                "likeCountA11y": "2.5K likes",
+                "replyCount": "150"
+              },
+              "engagement": {
+                "likeCount": 2500
+              }
+            }
+          }
+        },
+        {
+          "payload": {
+            "commentEntityPayload": {
+              "properties": {
+                "commentId": "UgzEntityPayload3Creator",
+                "content": {
+                  "content": "Thanks for watching everyone! - The Creator"
+                },
+                "publishedTime": "1 year ago"
+              },
+              "author": {
+                "displayName": "Rick Astley",
+                "channelId": "UCuAXFkgsw1L7xaCfnd5JJOw",
+                "isCreator": true
+              },
+              "toolbar": {
+                "likeCountA11y": "100K likes",
+                "replyCount": "5000"
+              },
+              "engagement": {
+                "likeCount": 100000
+              }
+            }
+          }
+        },
+        {
+          "payload": {
+            "commentEntityPayload": {
+              "properties": {
+                "commentId": "UgzEntityPayload4NoLikes",
+                "content": {
+                  "content": "Brand new comment with no likes yet"
+                },
+                "publishedTime": "Just now"
+              },
+              "author": {
+                "displayName": "@new_commenter",
+                "channelId": "UCnew789",
+                "isCreator": false
+              },
+              "toolbar": {
+                "likeCountA11y": "No likes",
+                "replyCount": "0"
+              },
+              "engagement": {
+                "likeCount": 0
+              }
+            }
+          }
+        },
+        {
+          "payload": {
+            "commentEntityPayload": {
+              "properties": {
+                "commentId": "UgzEntityPayload5Million",
+                "content": {
+                  "content": "This is the most liked comment ever!"
+                },
+                "publishedTime": "5 years ago"
+              },
+              "author": {
+                "displayName": "@viral_commenter",
+                "channelId": "UCviral000",
+                "isCreator": false
+              },
+              "toolbar": {
+                "likeCountA11y": "1.5M likes",
+                "replyCount": "25000"
+              },
+              "engagement": {
+                "likeCount": 1500000
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}
